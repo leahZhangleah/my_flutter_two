@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:repair_server/MainPage.dart';
 import 'package:repair_server/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:repair_server/comments/received_comments.dart';
 
 String account, password;
 enum Actions{Increase}
@@ -25,6 +26,7 @@ class AppState extends State<Rooter> with SingleTickerProviderStateMixin {
   final routes = <String, WidgetBuilder>{
     "/home": (context) => MainPage(), //主页//欢迎
     "/register": (context) => RegisterScreen(), //注册
+    "/comments":(context)=>ReceivedComments(),
   };
 
   String token,type = "";

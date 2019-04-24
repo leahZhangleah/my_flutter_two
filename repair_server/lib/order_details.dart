@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-class OrderDetiails extends StatefulWidget{
+class OrderDetails extends StatefulWidget{
 
   @override
   State<StatefulWidget> createState() {
-    return OrderDetiailsState();
+    return OrderDetailsState();
   }
 
 }
 
-class OrderDetiailsState extends State<OrderDetiails>{
+class OrderDetailsState extends State<OrderDetails>{
 
   @override
   Widget build(BuildContext context) {

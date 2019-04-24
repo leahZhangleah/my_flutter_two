@@ -6,7 +6,7 @@ import 'package:repair_server/model/behavior.dart';
 import 'package:repair_server/model/personalmodel.dart';
 import 'package:repair_server/viewmodel/personal_view_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:repair_server/comments/received_comments.dart';
 class MinePage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -33,7 +33,7 @@ class MineState extends State<MinePage> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestGet(
-        "/repairs/repairsUser/personalInfo", null);
+        "/maintainer/maintainerUser/personalInfo", null);//todo
     print(response.data.toString());
     setState(() {
       name = json
@@ -73,7 +73,7 @@ class MineState extends State<MinePage> {
                 ScrollConfiguration(
                     behavior: MyBehavior(),
                     child: ListView.builder(
-                        itemCount: 5,
+                        itemCount: 3,
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
                           return buildAddressLine(index, data);
@@ -135,7 +135,7 @@ class MineState extends State<MinePage> {
                   Navigator.of(context).push(
                     new MaterialPageRoute(
                       builder: (c) {
-                        return null;
+                        return null; //todo go to personal setting page
                       },
                     ),
                   ).then((_) {
@@ -167,7 +167,7 @@ class MineState extends State<MinePage> {
                     ? Navigator.of(context).push(
                   new MaterialPageRoute(
                     builder: (c) {
-                      return null;
+                      return null;//todo navigate to 我的订单
                     },
                   ),
                 )
@@ -175,13 +175,13 @@ class MineState extends State<MinePage> {
                     ? Navigator.of(context).push(
                   new MaterialPageRoute(
                     builder: (c) {
-                      return null;
+                      return new ReceivedComments();//todo navigate to 收到评价
                     },
                   ),
                 ): Navigator.of(context).push(
                   new MaterialPageRoute(
                     builder: (c) {
-                      return null;
+                      return null;//TODO navigate to 认证信息
                     },
                   ),
                 );
