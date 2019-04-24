@@ -59,7 +59,7 @@ class MainPageState extends State<MainPage>{
     super.initState();
     UrlManager urlManager = new UrlManager();
     url = urlManager.maintainerList;
-    getOrders = _fetchOrders(nowPage, limit, typeList);
+    //getOrders = _fetchOrders(nowPage, limit, typeList);
   }
   @override
   Widget build(BuildContext context) {
