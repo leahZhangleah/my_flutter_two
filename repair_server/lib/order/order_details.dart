@@ -16,8 +16,6 @@ class OrderDetails extends StatefulWidget{
 
 class OrderDetailsState extends State<OrderDetails>{
   String _url;
-  //VideoPlayerController _videoPlayerController;
-  //bool initialised = false;
 
   @override
   void initState() {
@@ -31,14 +29,6 @@ class OrderDetailsState extends State<OrderDetails>{
     String baseUrl = urlManager.fileUploadServer;
     _url = baseUrl + widget.order.repairsOrdersDescriptionList[0].url;
     print(_url);
-    /*_videoPlayerController = VideoPlayerController.network(_url);
-    _videoPlayerController.initialize().then((_){
-      if(mounted){
-        setState(() {
-          initialised = true;
-        });
-      }
-    });*/
   }
 
   @override
@@ -59,14 +49,9 @@ class OrderDetailsState extends State<OrderDetails>{
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment:CrossAxisAlignment.start,
             children: <Widget>[
-              buildOrderDestription(),//120
-              //buildDivider(),//15
+              buildOrderDescription(),//120
               buildOrderInfo(),
-              //buildDivider(),//15
               buildOther(),//86
-              //buildDivider(),//15
-              //buildBottomLine(),//60
-              //Container(height: 1)
             ],
           );
       }),
@@ -78,7 +63,6 @@ class OrderDetailsState extends State<OrderDetails>{
   buildOrderInfo(){
     return Container(
       margin: EdgeInsets.only(top: 10.0),
-      height: 75,
       color: Colors.white,
       padding: EdgeInsets.all(10),
       child: Column(
@@ -102,25 +86,20 @@ class OrderDetailsState extends State<OrderDetails>{
   //公用行
   buildOther() => new Container(
     color: Colors.white,
-    //height: 85,
     margin: EdgeInsets.only(top: 10),
     padding: EdgeInsets.all(10),
-//    child: Text("等待报价",style: TextStyle(color: Colors.black)),
     child:Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
             padding:EdgeInsets.only(bottom: 10.0),
             child: Text("订单编号: "+widget.order.orderNumber)),
-        //Container(padding: EdgeInsets.only(top: 10,bottom: 10),child: Text("订单编号: "+widget.order.orderNumber)),
         Container(
-          //margin: EdgeInsets.only(left: 0,right: 15),
           child: Divider(height: 1,color: Colors.grey[200]),
         ),
         Container(
             padding: EdgeInsets.only(top: 10.0),
             child: Text("下单时间: "+widget.order.createTime)),
-        //Container(padding: EdgeInsets.only(top: 10,bottom: 10),child: Text("下单时间: "+widget.order.createTime)),
       ],
     ) ,
   );
@@ -131,7 +110,7 @@ class OrderDetailsState extends State<OrderDetails>{
   );*/
 
   //第二块
-  buildOrderDestription()=>new Container(
+  buildOrderDescription()=>new Container(
     color: Colors.white,
     padding: EdgeInsets.all(8.0),
     child: Center(
@@ -144,11 +123,18 @@ class OrderDetailsState extends State<OrderDetails>{
                 widget.order.description,
                 style: TextStyle(color: Colors.black)),
           ),
-          SizedBox(height:10),
           Text(widget.order.type,style: TextStyle(color: Colors.grey[400])),
           Container(
-              height: 100.0,
-              child: VideoPlayerScreen(url:_url,))
+            width: 50,
+              height: 50,
+              child:GestureDetector(
+                onTap: ()=>Navigator.push(
+                    context,
+                    new MaterialPageRoute(builder: (context){
+                      return new VideoPlayerScreen(url:_url);
+                    })),
+                child: Image.asset("assets/images/video_thumbnail.jpeg"),
+              ) )
         ],
       ),
     )

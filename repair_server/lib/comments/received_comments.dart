@@ -54,8 +54,10 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
             return new RegisterScreen();
           }));
     }
-    total = CommentResponse.fromJson(json).page.total;
-    return CommentResponse.fromJson(json).page.comments;
+    Page page = CommentResponse.fromJson(json).page;
+    total = page.total;
+    comments.addAll(page.comments);
+    return comments;
   }
 
   //下拉刷新
@@ -63,8 +65,8 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
     return new Future.delayed(new Duration(seconds: 2), () {
       setState(() {
         nowPage = 1;
-        limit = 10;
-        getComments = _getReceivedComments(nowPage,limit);
+        comments.clear();
+        //getComments = _getReceivedComments(nowPage,limit);
         //_getReceivedComments(nowPage, limit);
       });
     });
@@ -76,7 +78,6 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
       if(comments.length < total){
         setState(() {
           nowPage+=1;
-          getComments = _getReceivedComments(nowPage,limit);
         });
       }else{
         Fluttertoast.showToast(msg: "没有更多的评价了");
@@ -105,9 +106,6 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
                             child: Text(snapshot.error.toString()),
                           );
                         }else if(snapshot.hasData){
-                          for(Comment comment in snapshot.data){
-                            comments.add(comment);
-                          }
                           //comments.addAll(snapshot.data);//todo to be adjusted
                           return buildCommentsList(comments);
                         }else{

@@ -35,26 +35,27 @@ class MainPageState extends State<MainPage>{
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
 
-      /*setState(() {
-        nowPage += 5;
-        limit += 5;
-        if (nowPage > total) {
+      setState(() {
+        nowPage += 1;
+        //limit += 5;
+        if (orderList.length >= total) {
           Fluttertoast.showToast(msg: "没有更多的订单了");
         } else {
-          getYetReceiveOrder(nowPage, limit);
+          _fetchOrders(nowPage, limit,typeList);
         }
-      });*/
+      });
     });
   }
 
   //下拉刷新
   Future<Null> onHeaderRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
-      /*setState(() {
+      setState(() {
         nowPage = 1;
         limit = 5;
-        getYetReceiveOrder(nowPage, limit);
-      });*/
+        orderList.clear();
+        _fetchOrders(nowPage, limit, typeList);
+      });
     });
   }
 
@@ -134,7 +135,7 @@ class MainPageState extends State<MainPage>{
       //_urlManager.fileUploadServer = orderResponse.fileUploadServer;
       Page page= orderResponse.page;
       total = page.total;
-      orderList= page.orders;
+      orderList.addAll(page.orders);
     });
     /*total = CommentResponse.fromJson(json).page.total;
     return CommentResponse.fromJson(json).page.comments;*/
