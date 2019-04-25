@@ -32,16 +32,16 @@ class OrderResponse {
 
 class Page {
   int total;
-  List<Order> rows;
+  List<Order> orders;
 
-  Page({this.total, this.rows});
+  Page({this.total, this.orders});
 
   Page.fromJson(Map<String, dynamic> json) {
     total = json['total'];
     if (json['rows'] != null) {
-      rows = new List<Order>();
+      orders = new List<Order>();
       json['rows'].forEach((v) {
-        rows.add(new Order.fromJson(v));
+        orders.add(new Order.fromJson(v));
       });
     }
   }
@@ -49,8 +49,8 @@ class Page {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['total'] = this.total;
-    if (this.rows != null) {
-      data['rows'] = this.rows.map((v) => v.toJson()).toList();
+    if (this.orders != null) {
+      data['rows'] = this.orders.map((v) => v.toJson()).toList();
     }
     return data;
   }

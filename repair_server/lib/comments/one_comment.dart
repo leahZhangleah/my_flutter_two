@@ -66,10 +66,10 @@ class OneCommentState extends State<OneComment> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  _buildUser(comment), //todo replace it with widget.comment
+                  _buildUser(widget.comment), //todo replace it with widget.comment
                   Divider(height: 2,color: Colors.grey,),
-                  _buildContent(comment),//todo replace it with widget.comment
-                  _buildOrder(comment),//todo replace it with widget.comment
+                  _buildContent(widget.comment),//todo replace it with widget.comment
+                  _buildOrder(widget.comment),//todo replace it with widget.comment
                 ],
               ),
             )),

@@ -3,9 +3,9 @@ import 'order.dart';
 import 'package:repair_server/order_details.dart';
 import 'package:repair_server/date_format.dart';
 class OneOrder extends StatefulWidget{
-  //Order order;
+  Order order;
 
- // OneOrder({this.order});
+ OneOrder({this.order});
 
   @override
   State<StatefulWidget> createState() {
@@ -38,7 +38,7 @@ class OneOrderState extends State<OneOrder> {
                     Row(
                       children: <Widget>[
                         Text("订单编号："),
-                        Text("12345678"),
+                        Text(widget.order.orderNumber),
                       ],
                     ),
                     Divider(
@@ -48,17 +48,17 @@ class OneOrderState extends State<OneOrder> {
                     Padding(
                         padding:
                         EdgeInsets.only(top: 5, bottom: 20),
-                        child: Text("这里是损坏的描述信息",
+                        child: Text(widget.order.description,
                             style: TextStyle(
                                 fontSize: 18,
                                 color: Colors.black))),
                     Text(
-                      "#墙面开裂",
+                      widget.order.type,
                       style: TextStyle(color: Colors.lightBlue),
                     ),
                     Padding(
                         padding: EdgeInsets.only(top: 5, bottom: 5),
-                        child: Text(formatDate(DateTime.now(), [yyyy,'-',mm,'-',dd ,"  ",HH,':',nn,':',ss]),
+                        child: Text(widget.order.updateTime,//formatDate(DateTime.now(), [yyyy,'-',mm,'-',dd ,"  ",HH,':',nn,':',ss])
                             style:
                             TextStyle(color: Colors.grey))),
                     Divider(

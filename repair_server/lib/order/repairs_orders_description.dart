@@ -28,10 +28,10 @@ class RepairsOrdersQuote {
   String id;
   String repairsOrdersId;
   String maintainerUserId;
-  int quoteMoney;
-  int subscriptionRate;
-  int subscriptionMoney;
-  int balanceMoney;
+  double quoteMoney;
+  double subscriptionRate;
+  double subscriptionMoney;
+  double balanceMoney;
 
   RepairsOrdersQuote(
       {this.id,

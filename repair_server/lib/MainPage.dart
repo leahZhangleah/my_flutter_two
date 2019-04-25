@@ -8,6 +8,7 @@ import 'knowledge/knowledge_page.dart';
 import 'order/order.dart';
 import 'url_manager.dart';
 import 'dart:convert';
+import 'package:repair_server/order/order_response.dart';
 
 class MainPage extends StatefulWidget{
   @override
@@ -24,12 +25,13 @@ class MainPageState extends State<MainPage>{
   int total = 0;
   String url = "";
   String typeList = "three"; //stands for 已报价
-  List<Order> orders;
+  List<Order> orderList = [];
   var getOrders;
 
   //上拉加载更多
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
+
 //      setState(() {
 //        nowPage += 5;
 //        limit += 5;
@@ -59,7 +61,8 @@ class MainPageState extends State<MainPage>{
     super.initState();
     UrlManager urlManager = new UrlManager();
     url = urlManager.maintainerList;
-    //getOrders = _fetchOrders(nowPage, limit, typeList);
+    //orderList = new List();
+    _fetchOrders(nowPage, limit, typeList);
   }
   @override
   Widget build(BuildContext context) {
@@ -97,14 +100,14 @@ class MainPageState extends State<MainPage>{
             onFooterRefresh: onFooterRefresh,
             onHeaderRefresh: onHeaderRefresh,
             child: ListView.builder(
-                itemCount: 5,
+                itemCount: orderList==null?0:orderList.length,
                 itemBuilder: (context, index) {
 //                  var missedOrder = _yetReceiveOrder[index];
-                  return new OneOrder() ;//order: orders[index],
+                  return new OneOrder(order:orderList[index]) ;//order: orders[index],
                 })));
   }
 
-  Future<List<Order>> _fetchOrders(int nowPage, int limit,String typeList) async {
+  Future<void> _fetchOrders(int nowPage, int limit,String typeList) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
@@ -114,7 +117,11 @@ class MainPageState extends State<MainPage>{
     print(response.data.toString());
     var json = jsonDecode(response.data.toString());
     //todo parse json as below
-
+    setState(() {
+      Page page= OrderResponse.fromJson(json).page;
+      total = page.total;
+      orderList= page.orders;
+    });
     /*total = CommentResponse.fromJson(json).page.total;
     return CommentResponse.fromJson(json).page.comments;*/
   }

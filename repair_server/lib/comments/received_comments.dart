@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'comment_response.dart';
 import 'one_comment.dart';
 import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/register.dart';
 
 class ReceivedComments extends StatefulWidget {
   @override
@@ -31,6 +32,7 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
     super.initState();
     UrlManager urlManager = new UrlManager();
     url = urlManager.receiveAppraiseList;
+    comments=new List();
     getComments=_getReceivedComments(nowPage, limit);
   }
 
@@ -44,6 +46,14 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
         {"nowPage": nowPage, "limit": limit});
     print(response.data.toString());
     var json = jsonDecode(response.data.toString());
+    if(json["msg"]=="token失效，请重新登录"){
+      Fluttertoast.showToast(msg: "登录信息已失效，请重新登录");
+      Navigator.pop(context);
+      Navigator.push(context, new MaterialPageRoute(
+          builder: (context){
+            return new RegisterScreen();
+          }));
+    }
     total = CommentResponse.fromJson(json).page.total;
     return CommentResponse.fromJson(json).page.comments;
   }
@@ -63,13 +73,14 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
   //上拉加载更多
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
-      if(nowPage >= total){
+      if(comments.length < total){
+        setState(() {
+          nowPage+=1;
+          getComments = _getReceivedComments(nowPage,limit);
+        });
+      }else{
         Fluttertoast.showToast(msg: "没有更多的评价了");
       }
-      setState(() {
-        nowPage+=1;
-        getComments = _getReceivedComments(nowPage,limit);
-      });
     });
   }
 
@@ -94,7 +105,10 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
                             child: Text(snapshot.error.toString()),
                           );
                         }else if(snapshot.hasData){
-                          comments.addAll(snapshot.data);//todo to be adjusted
+                          for(Comment comment in snapshot.data){
+                            comments.add(comment);
+                          }
+                          //comments.addAll(snapshot.data);//todo to be adjusted
                           return buildCommentsList(comments);
                         }else{
                           return Align(
