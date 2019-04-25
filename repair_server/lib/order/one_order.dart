@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'order.dart';
-import 'package:repair_server/order_details.dart';
+import 'package:repair_server/order/order_details.dart';
 import 'package:repair_server/date_format.dart';
 class OneOrder extends StatefulWidget{
   Order order;
@@ -30,7 +30,7 @@ class OneOrderState extends State<OneOrder> {
                 onTap: () => Navigator.push(context,
                     new MaterialPageRoute(
                         builder: (BuildContext context) {
-                          return new OrderDetails();
+                          return new OrderDetails(order: widget.order,);
                         })),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

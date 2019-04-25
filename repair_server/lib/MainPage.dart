@@ -9,6 +9,8 @@ import 'order/order.dart';
 import 'url_manager.dart';
 import 'dart:convert';
 import 'package:repair_server/order/order_response.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'register.dart';
 
 class MainPage extends StatefulWidget{
   @override
@@ -27,31 +29,32 @@ class MainPageState extends State<MainPage>{
   String typeList = "three"; //stands for 已报价
   List<Order> orderList = [];
   var getOrders;
+  UrlManager _urlManager;
 
   //上拉加载更多
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
 
-//      setState(() {
-//        nowPage += 5;
-//        limit += 5;
-//        if (nowPage > total) {
-//          Fluttertoast.showToast(msg: "没有更多的订单了");
-//        } else {
-//          getYetReceiveOrder(nowPage, limit);
-//        }
-//      });
+      /*setState(() {
+        nowPage += 5;
+        limit += 5;
+        if (nowPage > total) {
+          Fluttertoast.showToast(msg: "没有更多的订单了");
+        } else {
+          getYetReceiveOrder(nowPage, limit);
+        }
+      });*/
     });
   }
 
   //下拉刷新
   Future<Null> onHeaderRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
-//      setState(() {
-//        nowPage = 1;
-//        limit = 5;
-//        getYetReceiveOrder(nowPage, limit);
-//      });
+      /*setState(() {
+        nowPage = 1;
+        limit = 5;
+        getYetReceiveOrder(nowPage, limit);
+      });*/
     });
   }
 
@@ -59,8 +62,8 @@ class MainPageState extends State<MainPage>{
   void initState() {
     // TODO: implement initState
     super.initState();
-    UrlManager urlManager = new UrlManager();
-    url = urlManager.maintainerList;
+    _urlManager = new UrlManager();
+    url = _urlManager.maintainerList;
     //orderList = new List();
     _fetchOrders(nowPage, limit, typeList);
   }
@@ -117,8 +120,19 @@ class MainPageState extends State<MainPage>{
     print(response.data.toString());
     var json = jsonDecode(response.data.toString());
     //todo parse json as below
+    if(json["msg"]=="token失效，请重新登录"){
+      Fluttertoast.showToast(msg: "登录信息已失效，请重新登录");
+      Navigator.pop(context);
+      Navigator.push(context, new MaterialPageRoute(
+          builder: (context){
+            return new RegisterScreen();
+          }));
+    }
+
     setState(() {
-      Page page= OrderResponse.fromJson(json).page;
+      OrderResponse orderResponse = OrderResponse.fromJson(json);
+      //_urlManager.fileUploadServer = orderResponse.fileUploadServer;
+      Page page= orderResponse.page;
       total = page.total;
       orderList= page.orders;
     });
