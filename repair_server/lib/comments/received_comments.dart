@@ -24,7 +24,6 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
   int total = 0;
   List<Comment> comments;
   String url = "";
-  var getComments;
 
   @override
   void initState() {
@@ -33,11 +32,11 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
     UrlManager urlManager = new UrlManager();
     url = urlManager.receiveAppraiseList;
     comments=new List();
-    getComments=_getReceivedComments(nowPage, limit);
+    _getReceivedComments(nowPage, limit);
   }
 
   //待报价订单列表
-  Future<List<Comment>> _getReceivedComments(int nowPage, int limit) async {
+  Future<void> _getReceivedComments(int nowPage, int limit) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
@@ -49,15 +48,15 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
     if(json["msg"]=="token失效，请重新登录"){
       Fluttertoast.showToast(msg: "登录信息已失效，请重新登录");
       Navigator.pop(context);
-      Navigator.push(context, new MaterialPageRoute(
-          builder: (context){
-            return new RegisterScreen();
-          }));
+      Navigator.of(context).pushAndRemoveUntil(
+          new MaterialPageRoute(builder: (context) => new RegisterScreen()
+          ),  ModalRoute.withName('/'),);
     }
-    Page page = CommentResponse.fromJson(json).page;
-    total = page.total;
-    comments.addAll(page.comments);
-    return comments;
+    setState(() {
+      Page page = CommentResponse.fromJson(json).page;
+      total = page.total;
+      comments.addAll(page.comments);
+    });
   }
 
   //下拉刷新
@@ -66,8 +65,7 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
       setState(() {
         nowPage = 1;
         comments.clear();
-        //getComments = _getReceivedComments(nowPage,limit);
-        //_getReceivedComments(nowPage, limit);
+        _getReceivedComments(nowPage,limit);
       });
     });
   }
@@ -78,6 +76,7 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
       if(comments.length < total){
         setState(() {
           nowPage+=1;
+          _getReceivedComments(nowPage,limit);
         });
       }else{
         Fluttertoast.showToast(msg: "没有更多的评价了");
@@ -89,38 +88,22 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("评价"),
+        title: Text("收到评价"),
         centerTitle: true,
       ),
       body: Container(
           decoration: BoxDecoration(color: Colors.grey[200]),
           child: Refresh(
-              childBuilder: (BuildContext context,
-                  {ScrollController controller, ScrollPhysics physics}){
-                return FutureBuilder<List<Comment>>(
-                    future: getComments,//todo
-                    builder: (context, snapshot){
-                      if(snapshot.connectionState==ConnectionState.done){
-                        if(snapshot.hasError){
-                          return Center(
-                            child: Text(snapshot.error.toString()),
-                          );
-                        }else if(snapshot.hasData){
-                          //comments.addAll(snapshot.data);//todo to be adjusted
-                          return buildCommentsList(comments);
-                        }else{
-                          return Align(
-                            alignment: AlignmentDirectional.topCenter,
-                            child: Text("目前还没有评价"),
-                          );
-                        }
-                      }else if(snapshot.connectionState==ConnectionState.waiting){
-                        return Center(
-                            child:new CircularProgressIndicator()
-                        );
-                      }
-                    });
-              },
+              child:
+                comments.length==0?
+                  SingleChildScrollView(
+                      child:Align(
+                        alignment: AlignmentDirectional.center,
+                        child: Text("目前还没有评价"),
+                      )
+                  )
+                :
+                buildCommentsList(comments),
               onFooterRefresh: onFooterRefresh,
               onHeaderRefresh: onHeaderRefresh,
               )),
@@ -140,7 +123,4 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 
-  _buildRefreshBody() {
-
-  }
 }

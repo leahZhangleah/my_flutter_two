@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'comment.dart';
+import 'package:repair_server/url_manager.dart';
 class OneComment extends StatefulWidget{
   Comment comment;
 
@@ -14,24 +15,15 @@ class OneComment extends StatefulWidget{
 }
 
 class OneCommentState extends State<OneComment> {
-  Comment comment;
+  UrlManager urlManager;
+  String imageBaseUrl;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    /*this.id,
-    this.ordersId,
-    this.ordersNumber,
-    this.ordersDescription,
-    this.ordersType,
-    this.content,
-    this.starLevel,
-    this.createUserId,
-    this.createUserName,
-    this.createUserHeadimg,
-    this.createTime,
-    this.updateTime,*/
-    comment= new Comment(
+    urlManager = new UrlManager();
+    imageBaseUrl = urlManager.fileUploadServer;
+   /* comment= new Comment(
       id: "1",
       ordersId: "2",
       ordersNumber: "3456",
@@ -44,7 +36,7 @@ class OneCommentState extends State<OneComment> {
       createUserHeadimg: "/uploadFile/img/img-a240f811gy1g26xf52xdag20h40rdqv5.gif",
       createTime:"2019-04-23 10:41:06",
       updateTime: "2019-04-23 10:41:06"
-    );
+    );*/
   }
   @override
   Widget build(BuildContext context) {
@@ -60,7 +52,7 @@ class OneCommentState extends State<OneComment> {
           //padding: EdgeInsets.fromLTRB(10, 15, 10, 5),
             margin: EdgeInsets.only(bottom: 8.0),
             child: Container(
-              padding: EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(16.0),
               decoration: BoxDecoration(color: Colors.white),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,6 +72,7 @@ class OneCommentState extends State<OneComment> {
     List<String> updateTime = comment.updateTime.split(" ");
     String date = updateTime[0];
     String time = updateTime[1];
+    String imageUrl = imageBaseUrl+comment.createUserHeadimg;
     return Padding(padding: EdgeInsets.only(top: 5,bottom: 5),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -88,9 +81,9 @@ class OneCommentState extends State<OneComment> {
             children: <Widget>[
               ClipOval(
                 child: FadeInImage.assetNetwork(
-                  placeholder: "assets/images/alucard.jpg",
+                  placeholder: "assets/images/person_placeholder.png",
                   fit: BoxFit.fitWidth,
-                  image: "https://ss0.baidu.com/6ONWsjip0QIZ8tyhnq/it/u=3463668003,3398677327&fm=58",//todo
+                  image: imageUrl,//"https://ss0.baidu.com/6ONWsjip0QIZ8tyhnq/it/u=3463668003,3398677327&fm=58",//todo
                   width: 35.0,),
               ),
               Padding(
@@ -132,18 +125,18 @@ class OneCommentState extends State<OneComment> {
     return Container(
       padding: EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-          color: Colors.grey
+          color: Colors.grey[300]
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
             comment.ordersDescription,
-            style: TextStyle(color: Colors.black,fontSize: 16.0),
+            style: TextStyle(color: Colors.black,fontSize: 14.0),
           ),
           Text(
             "#"+comment.ordersType,
-            style: TextStyle(color: Colors.blue,fontSize: 16.0),
+            style: TextStyle(color: Colors.blue,fontSize: 14.0),
           ),
         ],
       ),

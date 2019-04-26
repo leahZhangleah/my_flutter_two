@@ -40,7 +40,7 @@ class OrderDetailsState extends State<OrderDetails>{
         leading:IconButton(icon: Icon(Icons.arrow_back_ios,color: Colors.white,), onPressed: ()=>Navigator.pop(context)),
       ),
     body: Container(
-      color: Colors.grey,
+      color: Colors.grey[300],
       child: ListView.builder(
         itemCount: 1,
         physics: BouncingScrollPhysics(),
@@ -124,6 +124,10 @@ class OrderDetailsState extends State<OrderDetails>{
                 style: TextStyle(color: Colors.black)),
           ),
           Text(widget.order.type,style: TextStyle(color: Colors.grey[400])),
+          /*Container(
+            height: 100,
+            child: new VideoPlayerScreen(url: _url,),
+          )*/
           Container(
             width: 50,
               height: 50,

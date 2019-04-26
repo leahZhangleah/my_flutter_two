@@ -35,11 +35,14 @@ class OneOrderState extends State<OneOrder> {
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Text("订单编号："),
-                        Text(widget.order.orderNumber),
-                      ],
+                    Container(
+                      padding: EdgeInsets.only(top: 8.0,bottom: 8.0),
+                      child: Row(
+                        children: <Widget>[
+                          Text("订单编号："),
+                          Text(widget.order.orderNumber),
+                        ],
+                      ),
                     ),
                     Divider(
                       height: 2,
@@ -47,13 +50,13 @@ class OneOrderState extends State<OneOrder> {
                     ),
                     Padding(
                         padding:
-                        EdgeInsets.only(top: 5, bottom: 20),
+                        EdgeInsets.only(top: 8.0, bottom: 20),
                         child: Text(widget.order.description,
                             style: TextStyle(
                                 fontSize: 18,
                                 color: Colors.black))),
                     Text(
-                      widget.order.type,
+                      "#"+widget.order.type,
                       style: TextStyle(color: Colors.lightBlue),
                     ),
                     Padding(
