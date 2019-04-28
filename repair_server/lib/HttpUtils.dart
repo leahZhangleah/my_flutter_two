@@ -4,8 +4,8 @@ import 'package:event_bus/event_bus.dart';
 import 'package:connectivity/connectivity.dart';
 
 class RequestManager {
-//  static String baseUrl = "http://115.159.93.175:8281";
-  static String baseUrl = "http://192.168.11.154:8281";
+  static String baseUrl = "http://115.159.93.175:8281";
+//  static String baseUrl = "http://192.168.11.154:8281";
 //  static String baseUrl = "http://192.168.11.114:8281";
 
   static Map<String, String> baseHeaders = {};

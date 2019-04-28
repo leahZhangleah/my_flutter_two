@@ -38,10 +38,13 @@ class MineState extends State<MinePage> {
     setState(() {
       name = json
           .decode(response.data.toString())
-          .cast<String, dynamic>()['repairsUser']['name'];
+          .cast<String, dynamic>()['maintainerUser']['name'];
       image = json
           .decode(response.data.toString())
-          .cast<String, dynamic>()['repairsUser']['headimg'];
+          .cast<String, dynamic>()['fileUploadServer']+
+          json
+          .decode(response.data.toString())
+          .cast<String, dynamic>()['maintainerUser']['positive'];
     });
   }
 
@@ -53,6 +56,7 @@ class MineState extends State<MinePage> {
     padingHorzation = deviceSize.width / 4;
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back_ios), onPressed: ()=>Navigator.pop(context)),
         flexibleSpace: Container(
           color: Colors.lightBlue,
         ),
@@ -125,7 +129,7 @@ class MineState extends State<MinePage> {
                 title: Text(
                   name,
                   style: TextStyle(
-                      letterSpacing: 5, fontSize: 20, color: Colors.white),
+                      letterSpacing: 0, fontSize: 20, color: Colors.white),
                 ),
                 trailing: Icon(
                   Icons.chevron_right,
