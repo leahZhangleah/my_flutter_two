@@ -124,10 +124,9 @@ class MainPageState extends State<MainPage>{
     if(json["msg"]=="token失效，请重新登录"){
       Fluttertoast.showToast(msg: "登录信息已失效，请重新登录");
       Navigator.pop(context);
-      Navigator.push(context, new MaterialPageRoute(
-          builder: (context){
-            return new RegisterScreen();
-          }));
+      Navigator.of(context).pushAndRemoveUntil(
+          new MaterialPageRoute(builder: (context) => new RegisterScreen()
+          ), (route)=>route==null);
     }
 
     setState(() {

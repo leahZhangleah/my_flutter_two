@@ -50,7 +50,7 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
       Navigator.pop(context);
       Navigator.of(context).pushAndRemoveUntil(
           new MaterialPageRoute(builder: (context) => new RegisterScreen()
-          ),  ModalRoute.withName('/'),);
+          ),  (route)=>route==null,);
     }
     setState(() {
       Page page = CommentResponse.fromJson(json).page;
