@@ -67,16 +67,18 @@ class PersonalState extends State<Personal> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestGet(
-        "/repairs/repairsUser/personalInfo",null);
+        "/maintainer/maintainerUser/personalInfo",null);
     print(response.data.toString());
     setState(() {
       name = json
           .decode(response.data.toString())
-          .cast<String, dynamic>()['repairsUser']['name'];
+          .cast<String, dynamic>()['maintainerUser']['name'];
       id = json
           .decode(response.data.toString())
-          .cast<String, dynamic>()['repairsUser']['id'];
-      imageUrl = json.decode(response.data.toString()).cast<String,dynamic>()['repairsUser']['headimg'];
+          .cast<String, dynamic>()['maintainerUser']['id'];
+      imageUrl = json
+          .decode(response.data.toString())
+          .cast<String, dynamic>()['maintainerUser']['headimg'];
     });
   }
 
@@ -91,19 +93,6 @@ class PersonalState extends State<Personal> {
       body: FutureBuilder(
         builder: _buildFuture,
         future: getInfo, // 用户定义的需要异步执行的代码，类型为Future<String>或者null的变量或函数
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Container(
-          height: 80.0,
-          child: RaisedButton(
-            onPressed: logout,
-            child: Text(
-              "退出登录",
-              style: TextStyle(fontSize: 20),
-            ),
-            color: Colors.lightBlue,
-          ),
-        ),
       ),
     );
   }
@@ -213,17 +202,6 @@ class PersonalState extends State<Personal> {
     }
 }
 
-  void logout() async{
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders={"token": token};
-    ResultModel response = await RequestManager.requestPost("/maintainer/logout",null);
-    if(json.decode(response.data.toString())["msg"]=="success"){
-      sp.remove("token");
-      Navigator.of(context).pushAndRemoveUntil(
-          new MaterialPageRoute(builder: (context) => new RegisterScreen()
-          ), (route) => route == null);
-    };
-  }
+
 
 }

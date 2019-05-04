@@ -13,6 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'register.dart';
 
 class MainPage extends StatefulWidget{
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -21,12 +22,13 @@ class MainPage extends StatefulWidget{
 
 }
 
+
+//type 0：报价员 1：维修员
 class MainPageState extends State<MainPage>{
   int nowPage = 1;
   int limit = 5;
   int total = 0;
-  String url = "";
-  String typeList = "three"; //stands for 已报价
+  String url,typeList = "";
   List<Order> orderList = [];
   var getOrders;
   UrlManager _urlManager;
@@ -34,14 +36,13 @@ class MainPageState extends State<MainPage>{
   //上拉加载更多
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
-
       setState(() {
-        nowPage += 1;
-        //limit += 5;
+        nowPage += 5;
+        limit += 5;
         if (orderList.length >= total) {
           Fluttertoast.showToast(msg: "没有更多的订单了");
         } else {
-          _fetchOrders(nowPage, limit,typeList);
+          _fetchOrders(1, limit,typeList,url);
         }
       });
     });
@@ -54,7 +55,7 @@ class MainPageState extends State<MainPage>{
         nowPage = 1;
         limit = 5;
         orderList.clear();
-        _fetchOrders(nowPage, limit, typeList);
+        _fetchOrders(nowPage, limit, typeList,url);
       });
     });
   }
@@ -64,10 +65,9 @@ class MainPageState extends State<MainPage>{
     // TODO: implement initState
     super.initState();
     _urlManager = new UrlManager();
-    url = _urlManager.maintainerList;
-    //orderList = new List();
-    _fetchOrders(nowPage, limit, typeList);
+    _fetchOrders(nowPage, limit, typeList,url);
   }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -111,9 +111,13 @@ class MainPageState extends State<MainPage>{
                 })));
   }
 
-  Future<void> _fetchOrders(int nowPage, int limit,String typeList) async {
+
+  Future<void> _fetchOrders(int nowPage, int limit,String typeList,String url) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String token = sp.getString("token");
+    String type = sp.getString("type");
+    type=="0"?typeList="five":typeList="three";
+    type=="0"?url=_urlManager.quoteList:url=_urlManager.maintainerList;
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestGet(
         url,
@@ -123,7 +127,7 @@ class MainPageState extends State<MainPage>{
     //todo parse json as below
     if(json["msg"]=="token失效，请重新登录"){
       Fluttertoast.showToast(msg: "登录信息已失效，请重新登录");
-      Navigator.pop(context);
+      sp.remove("type");
       Navigator.push(context, new MaterialPageRoute(
           builder: (context){
             return new RegisterScreen();
@@ -137,8 +141,6 @@ class MainPageState extends State<MainPage>{
       total = page.total;
       orderList.addAll(page.orders);
     });
-    /*total = CommentResponse.fromJson(json).page.total;
-    return CommentResponse.fromJson(json).page.comments;*/
   }
 
 }

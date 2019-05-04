@@ -3,6 +3,9 @@ class UrlManager{
   String _receiveAppraiseList = "/repairs/repairsOrdersAppraise/receiveAppraiseList";
   String _maintainerList = "/repairs/repairsOrders/maintainerList";
   String _fileUploadServer = "https://tac-xiuyixiu-ho-1258818500.cos.ap-shanghai.myqcloud.com";
+  String _quoteList = "/repairs/repairsOrders/quoteList";
+
+  String get quoteList => _quoteList;
 
   String get baseUrl => _baseUrl;
 

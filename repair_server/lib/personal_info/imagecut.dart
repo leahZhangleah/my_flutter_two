@@ -106,7 +106,7 @@ class ImagecutState extends State<Imagecut> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel resultModel = await RequestManager.requestPost(
-        "/repairs/repairsUser/update",
+        "/maintainer/maintainerUser/update",
         {"id": widget.id, "headimg": json.decode(response.toString())['fileUploadServer']+json.decode(response.toString())['data']['url']});
     print(resultModel.data);
     Fluttertoast.showToast(msg: json.decode(resultModel.data.toString()).cast<String, dynamic>()['msg']);

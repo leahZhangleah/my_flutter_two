@@ -5,11 +5,10 @@ import 'package:connectivity/connectivity.dart';
 
 class RequestManager {
   static String baseUrl = "http://115.159.93.175:8281";
-//  static String baseUrl = "http://192.168.11.154:8281";
+//  static String baseUrl = "http://192.168.1.11:8281";
 //  static String baseUrl = "http://192.168.11.114:8281";
 
   static Map<String, String> baseHeaders = {};
-
   static const CONNET_TYPE_JSON = "application/json";
   static const CONNET_TYPE_FORM = "application/x-www-form-urlencoded";
 

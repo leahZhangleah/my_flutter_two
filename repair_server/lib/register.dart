@@ -18,7 +18,7 @@ class RegisterScreen extends StatefulWidget {
 class RegisterState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final String baseUrl = "http://192.168.11.114:8281";
+  final String baseUrl = "http://115.159.93.175:8281";
   bool _isAllowCapcha = true;
   String hintText = "获取验证码";
   String unit = "秒";

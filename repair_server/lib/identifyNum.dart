@@ -2,18 +2,18 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Name extends StatefulWidget {
+class IdentifyNum extends StatefulWidget {
 
    final String name,id;
-  Name({this.name,this.id});
+   IdentifyNum({this.name,this.id});
 
   @override
   State<StatefulWidget> createState() {
-    return new NameState();
+    return new IdentifyNumState();
   }
 }
 
-class NameState extends State<Name> {
+class IdentifyNumState extends State<IdentifyNum> {
    TextEditingController _controller;
 
   void initState(){
@@ -33,7 +33,7 @@ class NameState extends State<Name> {
            options: options,
            data: {
              'id':widget.id,
-             'name':_controller.text
+             'identityNumber':_controller.text
            });
        print(response);
      } catch (e) {
@@ -45,7 +45,7 @@ class NameState extends State<Name> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("修改名字"),
+          title: Text("修改证件号码"),
           leading: IconButton(icon: Icon(Icons.arrow_back_ios), onPressed: ()=>Navigator.pop(context,_controller.text)),
           centerTitle: true,
           actions: <Widget>[
@@ -54,7 +54,7 @@ class NameState extends State<Name> {
                 if (_controller.text == '') {
                   showDialog(
                       context: context,
-                      builder: (BuildContext context) => new AlertDialog(title: new Text("请输入昵称") ));
+                      builder: (BuildContext context) => new AlertDialog(title: new Text("请输入姓名") ));
                   return;
                 }
                 updatePersonalInfo();
@@ -80,7 +80,7 @@ class NameState extends State<Name> {
                         controller: _controller,
                         decoration: new InputDecoration(
                           border: InputBorder.none,
-                          hintText: "用户名",
+                          hintText: "证件号码",
                           hintStyle: TextStyle(color:Colors.grey[200],fontSize: 22)
                         )
                     )

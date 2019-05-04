@@ -2,18 +2,18 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Name extends StatefulWidget {
+class IdentifyName extends StatefulWidget {
 
    final String name,id;
-  Name({this.name,this.id});
+   IdentifyName({this.name,this.id});
 
   @override
   State<StatefulWidget> createState() {
-    return new NameState();
+    return new IdentifyNameState();
   }
 }
 
-class NameState extends State<Name> {
+class IdentifyNameState extends State<IdentifyName> {
    TextEditingController _controller;
 
   void initState(){
@@ -33,7 +33,7 @@ class NameState extends State<Name> {
            options: options,
            data: {
              'id':widget.id,
-             'name':_controller.text
+             'realName':_controller.text
            });
        print(response);
      } catch (e) {
@@ -54,7 +54,7 @@ class NameState extends State<Name> {
                 if (_controller.text == '') {
                   showDialog(
                       context: context,
-                      builder: (BuildContext context) => new AlertDialog(title: new Text("请输入昵称") ));
+                      builder: (BuildContext context) => new AlertDialog(title: new Text("请输入姓名") ));
                   return;
                 }
                 updatePersonalInfo();
@@ -80,7 +80,7 @@ class NameState extends State<Name> {
                         controller: _controller,
                         decoration: new InputDecoration(
                           border: InputBorder.none,
-                          hintText: "用户名",
+                          hintText: "添加人",
                           hintStyle: TextStyle(color:Colors.grey[200],fontSize: 22)
                         )
                     )
