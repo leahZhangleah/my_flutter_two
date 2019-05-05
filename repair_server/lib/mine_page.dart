@@ -1,14 +1,18 @@
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/verification/identify.dart';
 import 'package:repair_server/model/behavior.dart';
 import 'package:repair_server/model/personalmodel.dart';
+import 'package:repair_server/order/order_self.dart';
+import 'package:repair_server/personal_info/personal.dart';
 import 'package:repair_server/register.dart';
 import 'package:repair_server/viewmodel/personal_view_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:repair_server/comments/received_comments.dart';
 class MinePage extends StatefulWidget {
+
   @override
   State<StatefulWidget> createState() {
     return MineState();
@@ -39,10 +43,11 @@ class MineState extends State<MinePage> {
     setState(() {
       name = json
           .decode(response.data.toString())
-          .cast<String, dynamic>()['repairsUser']['name'];
+          .cast<String, dynamic>()['maintainerUser']['name'];
+
       image = json
           .decode(response.data.toString())
-          .cast<String, dynamic>()['repairsUser']['headimg'];
+          .cast<String, dynamic>()['maintainerUser']['headimg'];
     });
   }
 
@@ -54,6 +59,7 @@ class MineState extends State<MinePage> {
     padingHorzation = deviceSize.width / 4;
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back_ios,), onPressed: ()=>Navigator.pop(context)),
         flexibleSpace: Container(
           color: Colors.lightBlue,
         ),
@@ -70,7 +76,6 @@ class MineState extends State<MinePage> {
             flex: 2,
             child: Column(
               children: <Widget>[
-//                      buildPersonalLine(), //第一行
                 ScrollConfiguration(
                     behavior: MyBehavior(),
                     child: ListView.builder(
@@ -82,22 +87,13 @@ class MineState extends State<MinePage> {
               ],
             ),
           ),
-          /*Expanded(
-            flex: 1,
-            child: Center(
-              child: Text(
-                "Copyright©2019-2029\n上海允宜实业发展有限公司",
-                textAlign: TextAlign.center,
-              ),
-            ),
-          )*/
         ],
       ),
       bottomNavigationBar: BottomAppBar(
         child: Container(
-          height: 60.0,
+          height: 80.0,
           child: RaisedButton(
-            onPressed: logOutDialog,
+            onPressed: logout,
             child: Text(
               "退出登录",
               style: TextStyle(fontSize: 20),
@@ -107,38 +103,6 @@ class MineState extends State<MinePage> {
         ),
       ),
     );
-  }
-
-  void logOutDialog(){
-    showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return CupertinoAlertDialog(
-          content: Text("确认退出登录？"),
-          actions: <Widget>[
-            CupertinoDialogAction(
-                onPressed: logout,
-                child: Text("确认")),
-            CupertinoDialogAction(
-                onPressed: ()=>Navigator.pop(context),
-                child: Text("取消")),
-          ],
-        );
-      },
-    );
-  }
-
-  void logout() async{
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders={"token": token};
-    ResultModel response = await RequestManager.requestPost("/maintainer/logout",null);
-    if(json.decode(response.data.toString())["msg"]=="success"||json.decode(response.data.toString())["msg"]=="token失效，请重新登录"){
-      sp.remove("token");
-      Navigator.of(context).pushAndRemoveUntil(
-          new MaterialPageRoute(builder: (context) => new RegisterScreen()
-          ),(route)=>route==null );
-    };
   }
 
   Widget buildPersonalLine(BuildContext context, AsyncSnapshot snapshot) {
@@ -171,7 +135,7 @@ class MineState extends State<MinePage> {
                 title: Text(
                   name,
                   style: TextStyle(
-                      letterSpacing: 5, fontSize: 20, color: Colors.white),
+                      letterSpacing: 0, fontSize: 20, color: Colors.white),
                 ),
                 trailing: Icon(
                   Icons.chevron_right,
@@ -181,7 +145,7 @@ class MineState extends State<MinePage> {
                   Navigator.of(context).push(
                     new MaterialPageRoute(
                       builder: (c) {
-                        return null; //todo go to personal setting page
+                        return Personal(); //todo go to personal setting page
                       },
                     ),
                   ).then((_) {
@@ -213,7 +177,7 @@ class MineState extends State<MinePage> {
                     ? Navigator.of(context).push(
                   new MaterialPageRoute(
                     builder: (c) {
-                      return null;//todo navigate to 我的订单
+                      return SelfOrder();//todo navigate to 我的订单
                     },
                   ),
                 )
@@ -227,7 +191,7 @@ class MineState extends State<MinePage> {
                 ): Navigator.of(context).push(
                   new MaterialPageRoute(
                     builder: (c) {
-                      return null;//TODO navigate to 认证信息
+                      return Identify();//TODO navigate to 认证信息
                     },
                   ),
                 );
@@ -239,5 +203,20 @@ class MineState extends State<MinePage> {
             margin: EdgeInsets.only(left: 15, right: 15),
           )
         ]));
+  }
+
+
+  void logout() async{
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String token = sp.getString("token");
+    RequestManager.baseHeaders={"token": token};
+    ResultModel response = await RequestManager.requestPost("/maintainer/logout",null);
+    if(json.decode(response.data.toString())["msg"]=="success"){
+      sp.remove("token");
+      sp.remove("type");
+      Navigator.of(context).pushAndRemoveUntil(
+          new MaterialPageRoute(builder: (context) => new RegisterScreen()
+          ), (route) => route == null);
+    };
   }
 }
