@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:repair_server/url_manager.dart';
 
 class Name extends StatefulWidget {
 
@@ -29,7 +30,7 @@ class NameState extends State<Name> {
      options.headers = {"token": token};
      try {
        Response response = await Dio().post(
-           "http://192.168.11.165:8281/maintainer/maintainerUser/update",
+           UrlManager().getUpdatePersonalInfoUrl(),
            options: options,
            data: {
              'id':widget.id,

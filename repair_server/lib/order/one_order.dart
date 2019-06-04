@@ -6,6 +6,7 @@ import 'package:repair_server/order/chooseMaintainer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'order.dart';
 import 'package:repair_server/order/order_details.dart';
+import 'package:repair_server/url_manager.dart';
 
 //维修员
 class OneOrder extends StatefulWidget {
@@ -137,7 +138,7 @@ class OneOrderState extends State<OneOrder> {
             color: Colors.lightBlue,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(5))),
-            child: Text("维修完成", style: new TextStyle(color: Colors.lightBlue)),
+            child: Text("确认完成", style: new TextStyle(color: Colors.lightBlue)),
             onPressed: () {
               showDialog<bool>(
                 barrierDismissible: false,
@@ -403,7 +404,7 @@ class OneOrderState extends State<OneOrder> {
     subscriptionRate =
         double.parse((subscriptionMoney / quoteMoney * 100).toStringAsFixed(2));
     ResultModel response =
-        await RequestManager.requestPost("/repairs/repairsOrdersQuote/save", {
+        await RequestManager.requestPost(UrlManager().saveQuote, {
       "balanceMoney": balanceMoney,
       "quoteMoney": quoteMoney,
       "subscriptionMoney": subscriptionMoney,
@@ -418,7 +419,7 @@ class OneOrderState extends State<OneOrder> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestPost(
-        "/repairs/repairsOrdersMaintainer/captureOrder/$ordersId", null);
+        UrlManager().captureOrder+ordersId, null);
     print(response.data.toString());
   }
 
@@ -428,7 +429,7 @@ class OneOrderState extends State<OneOrder> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestPost(
-        "/repairs/repairsOrders/successMaintainer/$ordersId", null);
+        UrlManager().finishMaintain+ordersId, null);
     print(response.data.toString());
   }
 }

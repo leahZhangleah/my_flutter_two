@@ -57,7 +57,7 @@ class SelfOrderState extends State<SelfOrder>
       new TabTitle('已报价', 2),
       new TabTitle('已完成', 3)
     ]:tabList = [
-      new TabTitle('已接单', 0),
+      new TabTitle('待维修', 0),
       new TabTitle('已完成', 1)
     ];
 

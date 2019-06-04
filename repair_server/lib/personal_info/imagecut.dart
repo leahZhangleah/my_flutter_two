@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:repair_server/HttpUtils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:repair_server/url_manager.dart';
 
 
 class Imagecut extends StatefulWidget {
@@ -97,7 +98,7 @@ class ImagecutState extends State<Imagecut> {
     });
 
     Response response = await dio.post(
-        "http://192.168.11.165:8281/upload/uploadImg",
+       UrlManager().getUploadImgUrl(),
         data: formData,
     );
     print(response);
@@ -106,7 +107,7 @@ class ImagecutState extends State<Imagecut> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel resultModel = await RequestManager.requestPost(
-        "/maintainer/maintainerUser/update",
+       UrlManager().updatePersonalInfo,
         {"id": widget.id, "headimg": json.decode(response.toString())['fileUploadServer']+json.decode(response.toString())['data']['url']});
     print(resultModel.data);
     Fluttertoast.showToast(msg: json.decode(resultModel.data.toString()).cast<String, dynamic>()['msg']);

@@ -8,6 +8,7 @@ import 'package:repair_server/order/order.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:repair_server/order/order_details.dart';
+import 'package:repair_server/url_manager.dart';
 
 class OrderMissed extends StatefulWidget {
   @override
@@ -36,7 +37,7 @@ class OrderMissedState extends State<OrderMissed>
     SharedPreferences sp = await SharedPreferences.getInstance();
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestPost("/repairs/repairsOrdersMaintainer/captureOrder/$ordersId",null);
+    ResultModel response = await RequestManager.requestPost(UrlManager().captureOrder+ordersId,null);
     print(response.data.toString());
   }
 
@@ -46,7 +47,7 @@ class OrderMissedState extends State<OrderMissed>
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestGet(
-        "/repairs/repairsOrders/quoteList",
+        UrlManager().quoteList,
         {"nowPage": nowPage, "limit": limit, "typeList": "one"});
     print(response.data.toString());
     setState(() {

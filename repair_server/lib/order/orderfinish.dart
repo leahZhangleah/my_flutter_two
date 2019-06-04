@@ -8,6 +8,7 @@ import 'package:repair_server/order/order.dart';
 import 'package:repair_server/order/order_details.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:repair_server/url_manager.dart';
 
 class OrderFinish extends StatefulWidget {
   @override
@@ -36,7 +37,7 @@ class OrderFinishState extends State<OrderFinish>
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestGet(
-        "/repairs/repairsOrders/quoteList",
+        UrlManager().quoteList,
         {"nowPage": nowPage, "limit": limit, "typeList": "four"});
     print(response.data.toString());
     setState(() {
@@ -54,7 +55,7 @@ class OrderFinishState extends State<OrderFinish>
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestPost(
-        "/repairs/repairsOrders/close/$id", null);
+        UrlManager().cancelOrder+id, null);
     print(response.data.toString());
     nowPage = 1;
     limit = 5;

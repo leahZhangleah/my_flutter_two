@@ -8,6 +8,7 @@ import 'package:repair_server/order/order.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:repair_server/order/order_details.dart';
+import 'package:repair_server/url_manager.dart';
 
 class OrderReceived extends StatefulWidget {
   @override
@@ -37,7 +38,7 @@ class OrderReceivedState extends State<OrderReceived>
     SharedPreferences sp = await SharedPreferences.getInstance();
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestPost("/repairs/repairsOrders/successMaintainer/$ordersId",null);
+    ResultModel response = await RequestManager.requestPost(UrlManager().finishMaintain+ordersId,null);
     print(response.data.toString());
   }
 
@@ -47,7 +48,7 @@ class OrderReceivedState extends State<OrderReceived>
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestGet(
-        "/repairs/repairsOrders/maintainerList",
+        UrlManager().maintainerList,
         {"nowPage": nowPage, "limit": limit, "typeList": "one"});
     print(response.data.toString());
     setState(() {
@@ -173,7 +174,7 @@ class OrderReceivedState extends State<OrderReceived>
                                             shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.all(
                                                     Radius.circular(5))),
-                                            child: Text("维修完成",
+                                            child: Text("确认完成",
                                                 style: new TextStyle(
                                                     color: Colors.lightBlue)),
                                             onPressed: () {

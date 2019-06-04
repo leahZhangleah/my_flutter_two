@@ -3,6 +3,7 @@ import 'package:repair_server/HttpUtils.dart';
 import 'package:repair_server/model/bottom_button.dart';
 import 'package:repair_server/model/staff.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:repair_server/url_manager.dart';
 
 class ChooseMaintainer extends StatefulWidget {
   final String orderId;
@@ -28,7 +29,7 @@ class ChooseMaintainerState extends State<ChooseMaintainer> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestGet(
-        "/maintainer/maintainerUser/myMaintainerUser", null);
+       UrlManager().myMaintainerUser, null);
     print(response.data.toString());
     setState(() {
       staffList = Staff.allFromResponse(response.data.toString());
@@ -47,7 +48,7 @@ class ChooseMaintainerState extends State<ChooseMaintainer> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestPost(
-        "/repairs/repairsOrdersMaintainer/allot/$ordersId",userIds);
+        UrlManager().allotMaintainer+ordersId,userIds);
     print(response.data.toString());
     Navigator.pop(context);
   }

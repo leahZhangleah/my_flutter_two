@@ -6,7 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:repair_server/MainPage.dart';
 import 'package:repair_server/RegisterResponse.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'url_manager.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 class RegisterScreen extends StatefulWidget {
   String _phone, _capcha;
 
@@ -19,7 +20,7 @@ class RegisterScreen extends StatefulWidget {
 class RegisterState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final String baseUrl = "http://192.168.11.165:8281";
+  final String baseUrl = UrlManager().baseUrl;
   bool _isAllowCapcha = true;
   String hintText = "获取验证码";
   String unit = "秒";
@@ -166,7 +167,7 @@ class RegisterState extends State<RegisterScreen> {
       return;
     }
     RegisterResponse result;
-    Response res = await dio.get("http://192.168.11.165:8281/captchaSMS",
+    Response res = await dio.get(UrlManager().getCaptchaSMS(),
         data: {"phone": widget._phone});
     if (res.statusCode == 200) {
       result = RegisterResponse.fromJson(res.data);
@@ -196,15 +197,20 @@ class RegisterState extends State<RegisterScreen> {
       });
       return;
     }
-    Response response = await dio.post("$baseUrl/maintainer/login",
+    Response response = await dio.post(UrlManager().getMaintainerLogin(),
         data: {"phone": widget._phone, "captcha": widget._capcha});
     print(response);
-    if (response.statusCode == 200 && response.data["code"] != 500) {
-      prefs.setString("token", response.data["token"]);
-      prefs.setString("type", response.data["type"].toString());
-      prefs.setString("account", widget._phone);
-      Navigator.of(context).pushAndRemoveUntil(
-          new MaterialPageRoute(builder: (context) => new MainPage()
-          ), (route) => route == null);    }
+    if(response.data["code"] == 500){
+      Fluttertoast.showToast(msg: response.data['msg']);
+    }else{
+      if (response.statusCode == 200 ) {
+        prefs.setString("token", response.data["token"]);
+        prefs.setString("type", response.data["type"].toString());
+        prefs.setString("account", widget._phone);
+        Navigator.of(context).pushAndRemoveUntil(
+            new MaterialPageRoute(builder: (context) => new MainPage()
+            ), (route) => route == null);    }
+    }
+
   }
 }

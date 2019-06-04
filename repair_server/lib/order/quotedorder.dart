@@ -9,6 +9,7 @@ import 'package:repair_server/order/order.dart';
 import 'package:repair_server/order/order_details.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:repair_server/url_manager.dart';
 
 class OrderQuote extends StatefulWidget {
   @override
@@ -38,7 +39,7 @@ class OrderQuoteState extends State<OrderQuote>
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestGet(
-        "/repairs/repairsOrders/quoteList",
+        UrlManager().quoteList,
         {"nowPage": nowPage, "limit": limit, "typeList": "three"});
     print(response.data.toString());
     setState(() {

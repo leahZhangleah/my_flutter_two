@@ -11,6 +11,7 @@ import 'package:repair_server/register.dart';
 import 'package:repair_server/viewmodel/personal_view_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:repair_server/comments/received_comments.dart';
+import 'url_manager.dart';
 class MinePage extends StatefulWidget {
 
   @override
@@ -38,7 +39,7 @@ class MineState extends State<MinePage> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestGet(
-        "/maintainer/maintainerUser/personalInfo", null);//todo
+       UrlManager().personalInfo, null);//todo
     print(response.data.toString());
     setState(() {
       name = json
@@ -125,7 +126,7 @@ class MineState extends State<MinePage> {
               child: ListTile(
                 leading: ClipOval(
                   child: FadeInImage.assetNetwork(
-                    placeholder: "assets/images/alucard.jpg",
+                    placeholder: "assets/images/person_placeholder.png",
                     fit: BoxFit.fitWidth,
                     image: image,
                     width: 75.0,
@@ -210,7 +211,7 @@ class MineState extends State<MinePage> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String token = sp.getString("token");
     RequestManager.baseHeaders={"token": token};
-    ResultModel response = await RequestManager.requestPost("/maintainer/logout",null);
+    ResultModel response = await RequestManager.requestPost(UrlManager().logout,null);
     if(json.decode(response.data.toString())["msg"]=="success"){
       sp.remove("token");
       sp.remove("type");

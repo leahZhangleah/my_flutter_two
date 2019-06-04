@@ -9,6 +9,7 @@ import 'package:repair_server/personal_info/imagecut.dart';
 import 'package:repair_server/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:repair_server/url_manager.dart';
 
 class Personal extends StatefulWidget {
 
@@ -22,7 +23,7 @@ class Personal extends StatefulWidget {
 class PersonalState extends State<Personal> {
   num paddingHorizontal = 20.0;
   String name,id,_res,url="";
-  String imageUrl = "assets/images/alucard.jpg";
+  String imageUrl = "assets/images/person_placeholder.png"; //initial placeholder image
   var getInfo;
   bool isVideo = false;
   Future<File> _imageFile;
@@ -67,7 +68,7 @@ class PersonalState extends State<Personal> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestGet(
-        "/maintainer/maintainerUser/personalInfo",null);
+        UrlManager().personalInfo,null);
     print(response.data.toString());
     setState(() {
       name = json

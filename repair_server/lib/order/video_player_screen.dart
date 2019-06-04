@@ -115,44 +115,4 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       )
     );
   }
-
-  /*FutureBuilder(
-  future: _initializeVideoPlayerFuture,
-  builder: (context, snapshot) {
-  if (snapshot.connectionState == ConnectionState.done) {
-  // If the VideoPlayerController has finished initialization, use
-  // the data it provides to limit the Aspect Ratio of the Video
-  return AspectRatio(
-  aspectRatio: _controller.value.aspectRatio,
-  // Use the VideoPlayer widget to display the video
-  child: VideoPlayer(_controller),
-  );
-  } else {
-  // If the VideoPlayerController is still initializing, show a
-  // loading spinner
-  return Center(child: CircularProgressIndicator());
-  }
-  },
-  ),
-  FutureBuilder(
-  future: _initializeVideoPlayerFuture,
-  builder: (context,snapshot){
-  if(snapshot.connectionState==ConnectionState.done){
-  return Center(
-  child: _controller.value.isPlaying
-  ? Icon(
-  Icons.pause_circle_outline,
-  size: 60,
-  color: Colors.grey,
-  )
-      : Icon(
-  Icons.play_circle_outline,
-  size: 60,
-  color: Colors.grey,
-  ),
-  );
-  }else{
-  return Container();
-  }
-  })*/
 }

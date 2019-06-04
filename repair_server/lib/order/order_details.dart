@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'order.dart';
 import 'package:repair_server/url_manager.dart';
 import 'video_player_screen.dart';
+import 'package:repair_server/url_manager.dart';
 
 class OrderDetails extends StatefulWidget {
   Order order;
@@ -247,7 +248,7 @@ class OrderDetailsState extends State<OrderDetails> {
 
   buildSuccess() {
     return NextButton(
-      text: "维修完成",
+      text: "确认完成",
       onNext: ()=>success(widget.order.id),
       padingHorzation: 20.0,
     );
@@ -280,7 +281,7 @@ class OrderDetailsState extends State<OrderDetails> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestPost(
-        "/repairs/repairsOrdersMaintainer/captureOrder/$ordersId", null);
+       UrlManager().captureOrder+ordersId, null);
     print(response.data.toString());
   }
 
@@ -333,7 +334,7 @@ class OrderDetailsState extends State<OrderDetails> {
     subscriptionRate =
         double.parse((subscriptionMoney / quoteMoney * 100).toStringAsFixed(2));
     ResultModel response =
-        await RequestManager.requestPost("/repairs/repairsOrdersQuote/save", {
+        await RequestManager.requestPost(UrlManager().saveQuote, {
       "balanceMoney": balanceMoney,
       "quoteMoney": quoteMoney,
       "subscriptionMoney": subscriptionMoney,
@@ -478,7 +479,7 @@ class OrderDetailsState extends State<OrderDetails> {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestPost(
-        "/repairs/repairsOrders/successMaintainer/$ordersId", null);
+       UrlManager().finishMaintain+ordersId, null);
     print(response.data.toString());
     Navigator.pop(context);
   }

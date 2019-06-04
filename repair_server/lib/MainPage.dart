@@ -21,8 +21,6 @@ class MainPage extends StatefulWidget{
   }
 
 }
-
-
 //type 0：报价员 1：维修员
 class MainPageState extends State<MainPage>{
   int nowPage = 1;
@@ -108,7 +106,10 @@ class MainPageState extends State<MainPage>{
             child: ListView.builder(
                 itemCount: orderList==null?0:orderList.length,
                 itemBuilder: (context, index) {
-//                  var missedOrder = _yetReceiveOrder[index];
+                  if(orderList==null){
+                    return Text("目前还没有订单");
+                  }
+//               var missedOrder = _yetReceiveOrder[index];
                   return new OneOrder(order:orderList[index]) ;//order: orders[index],
                 })));
   }
