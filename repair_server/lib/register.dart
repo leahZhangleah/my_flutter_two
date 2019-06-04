@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:common_utils/common_utils.dart';
 import 'package:dio/dio.dart';
+import 'package:repair_server/MainPage.dart';
 import 'package:repair_server/RegisterResponse.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,7 +19,7 @@ class RegisterScreen extends StatefulWidget {
 class RegisterState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final String baseUrl = "http://115.159.93.175:8281";
+  final String baseUrl = "http://192.168.11.165:8281";
   bool _isAllowCapcha = true;
   String hintText = "获取验证码";
   String unit = "秒";
@@ -165,7 +166,7 @@ class RegisterState extends State<RegisterScreen> {
       return;
     }
     RegisterResponse result;
-    Response res = await dio.get("http://115.159.93.175:8281/captchaSMS",
+    Response res = await dio.get("http://192.168.11.165:8281/captchaSMS",
         data: {"phone": widget._phone});
     if (res.statusCode == 200) {
       result = RegisterResponse.fromJson(res.data);
@@ -202,7 +203,8 @@ class RegisterState extends State<RegisterScreen> {
       prefs.setString("token", response.data["token"]);
       prefs.setString("type", response.data["type"].toString());
       prefs.setString("account", widget._phone);
-      Navigator.of(context).pushReplacementNamed("/home");
-    }
+      Navigator.of(context).pushAndRemoveUntil(
+          new MaterialPageRoute(builder: (context) => new MainPage()
+          ), (route) => route == null);    }
   }
 }

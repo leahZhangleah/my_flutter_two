@@ -97,7 +97,7 @@ class ImagecutState extends State<Imagecut> {
     });
 
     Response response = await dio.post(
-        "http://115.159.93.175:8281/upload/uploadImg",
+        "http://192.168.11.165:8281/upload/uploadImg",
         data: formData,
     );
     print(response);

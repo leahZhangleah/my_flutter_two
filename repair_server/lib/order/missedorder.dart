@@ -188,7 +188,7 @@ class OrderMissedState extends State<OrderMissed>
                                         shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.all(
                                                 Radius.circular(5))),
-                                        child: Text("确认订单",
+                                        child: Text("抢单",
                                             style: new TextStyle(
                                                 color: Colors.lightBlue)),
                                         onPressed: () {
@@ -199,7 +199,7 @@ class OrderMissedState extends State<OrderMissed>
                                               return CupertinoAlertDialog(
                                                 title: CupertinoDialogAction(
                                                   child: Text(
-                                                    "是否确认订单？",
+                                                    "是否确认抢单？",
                                                     style: TextStyle(
                                                         fontSize: 18,
                                                         color:

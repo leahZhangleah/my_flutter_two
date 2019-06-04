@@ -124,7 +124,7 @@ class OrderReceivedState extends State<OrderReceived>
                               onTap: () => Navigator.push(context,
                                       new MaterialPageRoute(
                                           builder: (BuildContext context) {
-                                    return new OrderDetails();
+                                    return new OrderDetails(order: missedOrder,);
                                   })),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

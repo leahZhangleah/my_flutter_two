@@ -29,7 +29,7 @@ class NameState extends State<Name> {
      options.headers = {"token": token};
      try {
        Response response = await Dio().post(
-           "http://115.159.93.175:8281/repairs/repairsUser/update",
+           "http://192.168.11.165:8281/repairs/repairsUser/update",
            options: options,
            data: {
              'id':widget.id,

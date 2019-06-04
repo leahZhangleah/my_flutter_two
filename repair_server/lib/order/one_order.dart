@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/MainPage.dart';
 import 'package:repair_server/order/chooseMaintainer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'order.dart';
@@ -55,13 +56,15 @@ class OneOrderState extends State<OneOrder> {
                       color: Colors.grey,
                     ),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Padding(
-                                padding: EdgeInsets.only(top: 8.0, bottom: 20),
+                                padding: EdgeInsets.only(top: 5.0, bottom: 5),
                                 child: Text(widget.order.description,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                         fontSize: 18, color: Colors.black))),
                             Text(
@@ -79,23 +82,19 @@ class OneOrderState extends State<OneOrder> {
                                 children: <Widget>[
                                   Padding(
                                       padding:
-                                          EdgeInsets.only(top: 8.0, bottom: 20),
+                                          EdgeInsets.only(top: 5.0, bottom: 5),
                                       child: Text(
                                           "定金:" +
                                               widget.order.repairsOrdersQuote
                                                   .subscriptionMoney
                                                   .toString() +
-                                              "元",
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              color: Colors.black))),
+                                              "元",)),
                                   Text(
                                     "尾款:" +
                                         widget.order.repairsOrdersQuote
                                             .balanceMoney
                                             .toString() +
                                         "元",
-                                    style: TextStyle(color: Colors.lightBlue),
                                   ),
                                   Padding(
                                       padding:
@@ -105,8 +104,7 @@ class OneOrderState extends State<OneOrder> {
                                               widget.order.repairsOrdersQuote
                                                   .quoteMoney
                                                   .toString() +
-                                              "元",
-                                          style: TextStyle(color: Colors.grey)))
+                                              "元",))
                                 ],
                               )
                             : Container(),
@@ -369,7 +367,7 @@ class OneOrderState extends State<OneOrder> {
                                   double.parse(_subController.text),
                                   double.parse(_controller.text))
                               .then((_) {
-                            Navigator.pop(context);
+                        Navigator.pop(context);
                           }),
                       child: Container(
                         child: Text(

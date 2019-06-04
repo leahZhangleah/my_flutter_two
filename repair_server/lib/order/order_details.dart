@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:repair_server/HttpUtils.dart';
 import 'package:repair_server/model/bottom_button.dart';
+import 'package:repair_server/order/chooseMaintainer.dart';
 import 'package:repair_server/order/order_self.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'order.dart';
@@ -21,7 +22,7 @@ class OrderDetails extends StatefulWidget {
 
 class OrderDetailsState extends State<OrderDetails> {
   String _url;
-  num subscriptionMoney,subscriptionRate,balanceMoney,quoteMoney=0;
+  num subscriptionMoney, subscriptionRate, balanceMoney, quoteMoney = 0;
 
   @override
   void initState() {
@@ -67,7 +68,9 @@ class OrderDetailsState extends State<OrderDetails> {
                             buildOrderDescription(), //120
                             buildOrderInfo(),
                             buildOther(),
-                            widget.order.orderState>=15?buildMoney():Container()//86
+                            widget.order.orderState >= 15
+                                ? buildMoney()
+                                : Container() //86
                           ],
                         );
                       }),
@@ -78,7 +81,9 @@ class OrderDetailsState extends State<OrderDetails> {
                     ? buildBottomLineCapture()
                     : widget.order.orderState == 20
                         ? buildBottomLineAllot()
-                        : Container()
+                        : widget.order.orderState == 25
+                            ? buildSuccess()
+                            : Container()
           ],
         ));
   }
@@ -117,56 +122,64 @@ class OrderDetailsState extends State<OrderDetails> {
     );
   }
 
-  buildMoney()=> new Container(
-    color: Colors.white,
-    margin: EdgeInsets.only(top: 10),
-    padding: EdgeInsets.all(10),
-    child: Column(
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Container(
-                    padding: EdgeInsets.only(top: 5, bottom: 5),
-                    child:
-                    Text("定金: ")),
-                Container(
-                    padding: EdgeInsets.only(top: 5, bottom: 5),
-                    child: Text("尾款: ")),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Container(
-                    padding: EdgeInsets.only(top: 5, bottom: 5),
-                    child:
-                    Text("￥" + widget.order.repairsOrdersQuote.subscriptionMoney.toString() + "元")),
-                Container(
-                    padding: EdgeInsets.only(top: 5, bottom: 5),
-                    child: Text("￥" + widget.order.repairsOrdersQuote.balanceMoney.toString() + "元")),
-              ],
-            ),
-          ],
-        ),
-        Divider(height: 1,color: Colors.grey,),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Container(
-                padding: EdgeInsets.only(top: 5, bottom: 5),
-                child: Text("总付款: ")),
-            Container(
-                padding: EdgeInsets.only(top: 5, bottom: 5),
-                child: Text("￥" + widget.order.repairsOrdersQuote.quoteMoney.toString() + "元"))
-          ],
-        )
-      ],
-    )
-  );
+  buildMoney() => new Container(
+      color: Colors.white,
+      margin: EdgeInsets.only(top: 10),
+      padding: EdgeInsets.all(10),
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Container(
+                      padding: EdgeInsets.only(top: 5, bottom: 5),
+                      child: Text("定金: ")),
+                  Container(
+                      padding: EdgeInsets.only(top: 5, bottom: 5),
+                      child: Text("尾款: ")),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Container(
+                      padding: EdgeInsets.only(top: 5, bottom: 5),
+                      child: Text("￥" +
+                          widget.order.repairsOrdersQuote.subscriptionMoney
+                              .toString() +
+                          "元")),
+                  Container(
+                      padding: EdgeInsets.only(top: 5, bottom: 5),
+                      child: Text("￥" +
+                          widget.order.repairsOrdersQuote.balanceMoney
+                              .toString() +
+                          "元")),
+                ],
+              ),
+            ],
+          ),
+          Divider(
+            height: 1,
+            color: Colors.grey,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Container(
+                  padding: EdgeInsets.only(top: 5, bottom: 5),
+                  child: Text("总付款: ")),
+              Container(
+                  padding: EdgeInsets.only(top: 5, bottom: 5),
+                  child: Text("￥" +
+                      widget.order.repairsOrdersQuote.quoteMoney.toString() +
+                      "元"))
+            ],
+          )
+        ],
+      ));
 
   //公用行
   buildOther() => new Container(
@@ -194,11 +207,6 @@ class OrderDetailsState extends State<OrderDetails> {
           ],
         ),
       );
-
-/*  buildDivider() =>new Container(
-    height: 15,
-    color: Colors.grey[300],
-  );*/
 
   //第二块
   buildOrderDescription() => new Container(
@@ -237,6 +245,14 @@ class OrderDetailsState extends State<OrderDetails> {
     );
   }
 
+  buildSuccess() {
+    return NextButton(
+      text: "维修完成",
+      onNext: ()=>success(widget.order.id),
+      padingHorzation: 20.0,
+    );
+  }
+
   buildBottomLineCapture() {
     return NextButton(
       text: "立即报价",
@@ -248,7 +264,13 @@ class OrderDetailsState extends State<OrderDetails> {
   buildBottomLineAllot() {
     return NextButton(
       text: "分配订单",
-      onNext: _onNext,
+      onNext: (){
+        Navigator.push(context,
+            new MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return new ChooseMaintainer(orderId:widget.order.id);
+                }));
+      },
       padingHorzation: 20.0,
     );
   }
@@ -303,14 +325,15 @@ class OrderDetailsState extends State<OrderDetails> {
     );
   }
 
-  Future save(String id,num subscriptionMoney,num subscriptionRate) async {
+  Future save(String id, num subscriptionMoney, num balanceMoney) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
-    quoteMoney = double.parse((subscriptionMoney / subscriptionRate * 100).toStringAsFixed(2));
-    balanceMoney = quoteMoney - subscriptionMoney;
+    quoteMoney = subscriptionMoney + balanceMoney;
+    subscriptionRate =
+        double.parse((subscriptionMoney / quoteMoney * 100).toStringAsFixed(2));
     ResultModel response =
-    await RequestManager.requestPost("/repairs/repairsOrdersQuote/save", {
+        await RequestManager.requestPost("/repairs/repairsOrdersQuote/save", {
       "balanceMoney": balanceMoney,
       "quoteMoney": quoteMoney,
       "subscriptionMoney": subscriptionMoney,
@@ -318,7 +341,6 @@ class OrderDetailsState extends State<OrderDetails> {
       "subscriptionRate": subscriptionRate
     });
     print(response.data.toString());
-
   }
 
   _save() {
@@ -345,17 +367,15 @@ class OrderDetailsState extends State<OrderDetails> {
                 TextField(
                     controller: _subController,
                     onChanged: (text) {
-                      _quoteController.text =
-                          (num.parse(_subController.text) +
-                              num.parse(_controller.text))
+                      _quoteController.text = (num.parse(_subController.text) +
+                                  num.parse(_controller.text))
                               .toString() +
-                              "元";
-                      _rateController
-                          .text = (num.parse(_subController.text) /
-                          (num.parse(_controller.text) +
-                              num.parse(_subController.text)) *
-                          100)
-                          .toStringAsFixed(0) +
+                          "元";
+                      _rateController.text = (num.parse(_subController.text) /
+                                  (num.parse(_controller.text) +
+                                      num.parse(_subController.text)) *
+                                  100)
+                              .toStringAsFixed(0) +
                           "%";
                     },
                     decoration: InputDecoration(
@@ -372,17 +392,15 @@ class OrderDetailsState extends State<OrderDetails> {
                 TextField(
                   controller: _controller,
                   onChanged: (text) {
-                    _quoteController.text =
-                        (num.parse(_subController.text) +
-                            num.parse(_controller.text))
+                    _quoteController.text = (num.parse(_subController.text) +
+                                num.parse(_controller.text))
                             .toString() +
-                            "元";
-                    _rateController
-                        .text = (num.parse(_subController.text) /
-                        (num.parse(_controller.text) +
-                            num.parse(_subController.text)) *
-                        100)
-                        .toStringAsFixed(0) +
+                        "元";
+                    _rateController.text = (num.parse(_subController.text) /
+                                (num.parse(_controller.text) +
+                                    num.parse(_subController.text)) *
+                                100)
+                            .toStringAsFixed(0) +
                         "%";
                   },
                   decoration: InputDecoration(
@@ -424,12 +442,12 @@ class OrderDetailsState extends State<OrderDetails> {
           actions: <Widget>[
             CupertinoDialogAction(
               onPressed: () => save(
-                  widget.order.id,
-                  double.parse(_subController.text),
-                  double.parse(_controller.text))
-                  .then((_) {
-                Navigator.pop(context);
-              }),
+                          widget.order.id,
+                          double.parse(_subController.text),
+                          double.parse(_controller.text))
+                      .then((_) {
+                    Navigator.pop(context);
+                  }),
               child: Container(
                 child: Text(
                   "确定",
@@ -452,5 +470,16 @@ class OrderDetailsState extends State<OrderDetails> {
         );
       },
     );
+  }
+
+  //维修完成
+  Future<void> success(String ordersId) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String token = sp.getString("token");
+    RequestManager.baseHeaders = {"token": token};
+    ResultModel response = await RequestManager.requestPost(
+        "/repairs/repairsOrders/successMaintainer/$ordersId", null);
+    print(response.data.toString());
+    Navigator.pop(context);
   }
 }

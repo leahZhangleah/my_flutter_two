@@ -103,37 +103,102 @@ class MaintainerFinishState extends State<MaintainerFinish>
                 itemBuilder: (context, index) {
                   var finishOrder = _finishedOrder[index];
                   return Padding(
-                      padding: EdgeInsets.fromLTRB(10, 15, 10, 5),
-                      child: Container(
-                        decoration: BoxDecoration(color: Colors.white),
-                        child: Column(
-                          children: <Widget>[
-                            ListTile(
+                    padding: EdgeInsets.fromLTRB(10, 15, 10, 5),
+                    child: Container(
+                      decoration: BoxDecoration(color: Colors.white),
+                      child: Column(
+                        children: <Widget>[
+                          ListTile(
                               onTap: () => Navigator.push(context,
                                       new MaterialPageRoute(
                                           builder: (BuildContext context) {
-                                    return new OrderDetails();
+                                    return new OrderDetails(
+                                      order: finishOrder,
+                                    );
                                   })),
                               subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Padding(
-                                      padding:
-                                          EdgeInsets.only(top: 5, bottom: 20),
-                                      child: Text(finishOrder.description,
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              color: Colors.black))),
-                                  Text(
-                                    "#" + finishOrder.type,
-                                    style: TextStyle(color: Colors.lightBlue),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Expanded(
+                                          flex: 3,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Padding(
+                                                  padding: EdgeInsets.only(
+                                                      top: 10, bottom: 20),
+                                                  child: Text(
+                                                      finishOrder.description,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 1,
+                                                      style: TextStyle(
+                                                          fontSize: 18,
+                                                          color:
+                                                              Colors.black))),
+                                              Text(
+                                                "#" + finishOrder.type,
+                                                style: TextStyle(
+                                                    color: Colors.lightBlue),
+                                              ),
+                                              Padding(
+                                                  padding: EdgeInsets.only(
+                                                      top: 5, bottom: 5),
+                                                  child: Text(
+                                                      finishOrder.createTime,
+                                                      style: TextStyle(
+                                                          color: Colors.grey)))
+                                            ],
+                                          )),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Padding(
+                                            child: Text(
+                                              "定金：" +
+                                                  finishOrder.repairsOrdersQuote
+                                                      .subscriptionMoney
+                                                      .toString() +
+                                                  "元",
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                            padding: EdgeInsets.only(top: 10),
+                                          ),
+                                          Padding(
+                                            child: Text(
+                                              "尾款：" +
+                                                  finishOrder.repairsOrdersQuote
+                                                      .balanceMoney
+                                                      .toString() +
+                                                  "元",
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                            padding: EdgeInsets.only(top: 10),
+                                          ),
+                                          Padding(
+                                            child: Text(
+                                              "合计：" +
+                                                  finishOrder.repairsOrdersQuote
+                                                      .quoteMoney
+                                                      .toString() +
+                                                  "元",
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                            padding: EdgeInsets.only(top: 10),
+                                          )
+                                        ],
+                                      )
+                                    ],
                                   ),
-                                  Padding(
-                                      padding:
-                                          EdgeInsets.only(top: 5, bottom: 5),
-                                      child: Text(finishOrder.createTime,
-                                          style:
-                                              TextStyle(color: Colors.grey))),
                                   Divider(
                                     height: 2,
                                     color: Colors.grey,
@@ -156,11 +221,11 @@ class MaintainerFinishState extends State<MaintainerFinish>
                                                     color: Colors.lightBlue)),
                                       ))
                                 ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ));
+                              ))
+                        ],
+                      ),
+                    ),
+                  );
                 })));
   }
 

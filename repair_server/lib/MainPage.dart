@@ -88,7 +88,9 @@ class MainPageState extends State<MainPage>{
                 onPressed: ()=>Navigator.push(context, new MaterialPageRoute(
                     builder: (context){
                       return new MinePage();
-                    }))),//todo leading to personal page
+                    })).then((_){
+                  _fetchOrders(nowPage, limit, typeList,url);
+                })),//todo leading to personal page
           )
         ],
       ),
@@ -136,7 +138,6 @@ class MainPageState extends State<MainPage>{
 
     setState(() {
       OrderResponse orderResponse = OrderResponse.fromJson(json);
-      //_urlManager.fileUploadServer = orderResponse.fileUploadServer;
       Page page= orderResponse.page;
       total = page.total;
       orderList.addAll(page.orders);
