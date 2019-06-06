@@ -240,7 +240,7 @@ class OrderDetailsState extends State<OrderDetails> {
   //最后一行
   buildBottomLine() {
     return NextButton(
-      text: "确认订单",
+      text: "抢单",
       onNext: _onNext,
       padingHorzation: 20.0,
     );

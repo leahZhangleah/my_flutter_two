@@ -1,5 +1,5 @@
 class UrlManager{
-  String _baseUrl = "http://115.159.93.175:80";
+  String _baseUrl = "http://115.159.93.175:8281";
   String _captchSMS = "/captchaSMS";
   String _maintainerLogin = "/maintainer/login";
   String _receiveAppraiseList = "/repairs/repairsOrdersAppraise/receiveAppraiseList";

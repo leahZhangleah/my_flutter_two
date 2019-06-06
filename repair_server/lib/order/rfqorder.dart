@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:repair_server/HttpUtils.dart';
@@ -98,7 +99,7 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
     quoteMoney = subscriptionMoney + balanceMoney;
-    subscriptionRate = double.parse((subscriptionMoney / quoteMoney * 100).toStringAsFixed(2));
+    subscriptionRate = num.parse((subscriptionMoney / quoteMoney * 100).toStringAsFixed(2));
     ResultModel response =
         await RequestManager.requestPost(UrlManager().saveQuote, {
       "balanceMoney": balanceMoney,
@@ -228,7 +229,7 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                               return CupertinoAlertDialog(
                                                 title: CupertinoDialogAction(
                                                   child: Text(
-                                                    "报价金额",
+                                                    "报价",
                                                     style: TextStyle(
                                                         fontSize: 18,
                                                         color:
@@ -241,13 +242,22 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                                   child: Column(
                                                     children: <Widget>[
                                                       TextField(
+                                                        keyboardType: TextInputType.number,
+                                                          inputFormatters: [WhitelistingTextInputFormatter(new RegExp('[0-9.,]'))],//BlacklistingTextInputFormatter(new RegExp('[\\-|\\ ]')),
                                                         controller:_subController,
+                                                          onSubmitted: (text){
+                                                            if(num.parse(_controller.text)>100){
+                                                              Fluttertoast.showToast(msg: "定金比率不可以大于100");
+                                                              _controller.clear();
+                                                            }
+                                                          },
                                                           onChanged: (text){
-                                                            _quoteController.text=(num.parse(_subController.text)+num.parse(_controller.text)).toString()+"元";
-                                                            _rateController.text=(num.parse(_subController.text)/(num.parse(_controller.text)+num.parse(_subController.text))*100).toStringAsFixed(0)+"%";
+                                                            _quoteController.text=(num.parse(_subController.text)-num.parse(_controller.text)).toString();
+                                                            _rateController.text = (num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
+                                                            //_rateController.text=(num.parse(_subController.text)*(num.parse(_controller.text))/100).toStringAsFixed(0)+"%";
                                                           },
                                                         decoration: InputDecoration(
-                                                            labelText: "预付订金",
+                                                            labelText: "报价总金额",
                                                             filled: true,
                                                             fillColor: Colors.grey.shade50,
                                                           border: OutlineInputBorder(
@@ -255,15 +265,24 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                                       )),
                                                       Padding(padding: EdgeInsets.only(top: 5),),
                                                       TextField(
+                                                        keyboardType: TextInputType.number,
+                                                        inputFormatters: [WhitelistingTextInputFormatter(new RegExp('[0-9.,]'))],
                                                         controller:_controller,
+                                                          onSubmitted: (text){
+                                                          if(num.parse(_controller.text)>100){
+                                                            Fluttertoast.showToast(msg: "定金比率不可以大于100");
+                                                            _controller.clear();
+                                                          }
+                                                          },
                                                           onChanged: (text){
-                                                            _quoteController.text=(num.parse(_subController.text)+num.parse(_controller.text)).toString()+"元";
-                                                            _rateController.text=(num.parse(_subController.text)/(num.parse(_controller.text)+num.parse(_subController.text))*100).toStringAsFixed(0)+"%";
+                                                            _quoteController.text=(num.parse(_subController.text)-num.parse(_controller.text)).toStringAsPrecision(4);
+                                                            _rateController.text = (num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
                                                           },
                                                         decoration: InputDecoration(
+                                                          suffixText: "%",
                                                             border: OutlineInputBorder(
                                                               borderRadius: BorderRadius.circular(15.0),),
-                                                            labelText: "尾款",
+                                                            labelText: "定金比例",
                                                             filled: true,
                                                             fillColor: Colors.grey.shade50),
                                                       ),
@@ -272,7 +291,8 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                                         enabled: false,
                                                         controller:_rateController,
                                                         decoration: InputDecoration(
-                                                            labelText: "订金比率",
+                                                            suffixText: "元",
+                                                            labelText: "订金",
                                                             filled: true,
                                                             fillColor: Colors.grey.shade50),
                                                       ),
@@ -281,7 +301,8 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                                         enabled: false,
                                                         controller:_quoteController,
                                                         decoration: InputDecoration(
-                                                            labelText: "总金额",
+                                                          suffixText: "元",
+                                                            labelText: "尾款",
                                                             filled: true,
                                                             fillColor: Colors.grey.shade50),
                                                       ),
@@ -291,14 +312,13 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                                 ),
                                                 actions: <Widget>[
                                                   CupertinoDialogAction(
-                                                    onPressed: () =>
-                                                        save(missedOrder.id,double.parse(_subController.text),double.parse(_controller.text))
-                                                            .then((_) {
-                                                          Navigator.pop(
-                                                              context);
-                                                          getYetReceiveOrder(
-                                                              1, 5);
-                                                        }),
+                                                    onPressed: (){
+                                                      save(missedOrder.id,num.parse(_rateController.text),num.parse(_quoteController.text))
+                                                          .then((_) {
+                                                        Navigator.pop(context);
+                                                        getYetReceiveOrder(1, 5);
+                                                      });
+                                                    },
                                                     child: Container(
                                                       child: Text(
                                                         "确定",

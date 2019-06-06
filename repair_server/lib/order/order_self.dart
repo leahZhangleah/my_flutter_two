@@ -106,7 +106,8 @@ class SelfOrderState extends State<SelfOrder>
                           ? OrderMissed()
                           : item.index == 1
                           ? OrderRFQ()
-                          : item.index == 2 ? OrderQuote() : OrderFinish()):Center(
+                          : item.index == 2 ? OrderQuote() : OrderFinish())
+                      :Center(
                     child: item.index==0?OrderReceived():MaintainerFinish(),
                   )
                 ],
