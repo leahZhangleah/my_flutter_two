@@ -24,7 +24,7 @@ class OrderMissedState extends State<OrderMissed>
   int limit = 5;
   int total = 0;
   String url = "";
-  List<Order> mo;
+  List<Order> mo = [];
   var getOrder;
 
   @override
@@ -51,9 +51,13 @@ class OrderMissedState extends State<OrderMissed>
         {"nowPage": nowPage, "limit": limit, "typeList": "one"});
     print(response.data.toString());
     setState(() {
-      mo = OrderResponse.fromJson(json.decode(response.data.toString()))
+      if(OrderResponse.fromJson(json.decode(response.data.toString()))
           .page
-          .orders;
+          .orders!=null){
+        mo.addAll(OrderResponse.fromJson(json.decode(response.data.toString()))
+            .page
+            .orders);
+      }
       total = json
           .decode(response.data.toString())
           .cast<String, dynamic>()['page']['total'];
@@ -66,7 +70,7 @@ class OrderMissedState extends State<OrderMissed>
     return new Future.delayed(new Duration(seconds: 2), () {
       setState(() {
         nowPage = 1;
-        limit = 5;
+        mo.clear();
         getYetReceiveOrder(nowPage, limit);
       });
     });
@@ -76,12 +80,11 @@ class OrderMissedState extends State<OrderMissed>
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
       setState(() {
-        nowPage += 5;
-        limit += 5;
-        if (nowPage > total) {
+        if (mo.length >= total) {
           Fluttertoast.showToast(msg: "没有更多的订单了");
         } else {
-          getYetReceiveOrder(1, limit);
+          nowPage += 1;
+          getYetReceiveOrder(nowPage, limit);
         }
       });
     });
@@ -111,8 +114,11 @@ class OrderMissedState extends State<OrderMissed>
             onFooterRefresh: onFooterRefresh,
             onHeaderRefresh: onHeaderRefresh,
             child: ListView.builder(
-                itemCount: mo.length,
+                itemCount: mo.length==0?1:mo.length,
                 itemBuilder: (context, index) {
+                  if(mo==null||mo.length==0){
+                    return Center(child:Text("暂无相关数据～"));
+                  }
                   var missedOrder = mo[index];
                   return Padding(
                       padding: EdgeInsets.fromLTRB(10, 15, 10, 5),
@@ -211,6 +217,7 @@ class OrderMissedState extends State<OrderMissed>
                                                   CupertinoDialogAction(
                                                     onPressed: () =>captureOrder(missedOrder.id).then((_){
                                                       Navigator.pop(context);
+                                                      mo.clear();
                                                       getYetReceiveOrder(1, 5);
                                                     }),
                                                     child: Container(

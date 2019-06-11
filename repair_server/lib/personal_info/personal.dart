@@ -26,6 +26,7 @@ class PersonalState extends State<Personal> {
   String imageUrl = "assets/images/person_placeholder.png"; //initial placeholder image
   var getInfo;
   bool isVideo = false;
+
   Future<File> _imageFile;
 
   void initState(){
@@ -41,21 +42,25 @@ class PersonalState extends State<Personal> {
         return;
       } else {
          _imageFile = ImagePicker.pickImage(source: source).then((_){
+           if(_==null){
+             Navigator.pop(context);
+             return;
+           }
           // uploadHeadimg();
-           imageUrl = _.toString();
-          updatePersonHeading();
+           imageUrl = _.path;
+          updatePersonHeading(_);
         });
       }
     });
   }
 
-  Future updatePersonHeading() async{
-    print(imageUrl);
-    print(imageUrl.substring(7,imageUrl.length-1));
-    imageUrl = imageUrl.substring(7,imageUrl.length-1);
+  Future updatePersonHeading(File file) async{
+//    print(imageUrl);
+//    print(imageUrl.substring(7,imageUrl.length-1));
+//    imageUrl = imageUrl.substring(7,imageUrl.length-1);
     Navigator.push<String>(
         context,new MaterialPageRoute(builder: (BuildContext context){
-      return new Imagecut(imgurl:imageUrl,id:id);
+      return new Imagecut(imgurl:file,id:id);
     })
     ).then((_){
       Navigator.pop(context);

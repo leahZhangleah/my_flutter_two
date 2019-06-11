@@ -43,9 +43,9 @@ class OrderQuoteState extends State<OrderQuote>
         {"nowPage": nowPage, "limit": limit, "typeList": "three"});
     print(response.data.toString());
     setState(() {
-      rfqOrder = OrderResponse.fromJson(json.decode(response.data.toString()))
+      rfqOrder.addAll(OrderResponse.fromJson(json.decode(response.data.toString()))
           .page
-          .orders;
+          .orders);
       total = json
           .decode(response.data.toString())
           .cast<String, dynamic>()['page']['total'];
@@ -62,6 +62,7 @@ class OrderQuoteState extends State<OrderQuote>
       setState(() {
         nowPage = 1;
         limit = 5;
+        rfqOrder.clear();
         getYetReceiveOrder(nowPage, limit);
       });
     });
@@ -71,12 +72,11 @@ class OrderQuoteState extends State<OrderQuote>
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
       setState(() {
-        nowPage += 5;
-        limit += 5;
-        if (nowPage > total) {
+        if (rfqOrder.length >= total) {
           Fluttertoast.showToast(msg: "没有更多的订单了");
         } else {
-          getYetReceiveOrder(1, limit);
+          nowPage += 1;
+          getYetReceiveOrder(nowPage, limit);
         }
       });
     });
@@ -91,8 +91,11 @@ class OrderQuoteState extends State<OrderQuote>
             onFooterRefresh: onFooterRefresh,
             onHeaderRefresh: onHeaderRefresh,
             child: ListView.builder(
-                itemCount: rfqOrder.length,
+                itemCount: rfqOrder.length==0?1:rfqOrder.length,
                 itemBuilder: (context, index) {
+                  if(rfqOrder==null||rfqOrder.length==0){
+                    return Center(child:Text("暂无相关数据～"));
+                  }
                   var missedOrder = rfqOrder[index];
                   return Padding(
                       padding: EdgeInsets.fromLTRB(10, 15, 10, 5),
@@ -275,6 +278,7 @@ class OrderQuoteState extends State<OrderQuote>
                                                           builder: (BuildContext context) {
                                                             return new ChooseMaintainer(orderId:missedOrder.id);
                                                           })).then((_){
+                                                            rfqOrder.clear();
                                                             getYetReceiveOrder(1, 5);
                                                   });
                                                 })

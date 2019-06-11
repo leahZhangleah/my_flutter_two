@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:repair_server/HttpUtils.dart';
 import 'package:repair_server/MainPage.dart';
 import 'package:repair_server/order/chooseMaintainer.dart';
@@ -153,7 +155,9 @@ class OneOrderState extends State<OneOrder> {
                     ),
                     actions: <Widget>[
                       CupertinoDialogAction(
-                        onPressed: () => success(widget.order.id),
+                        onPressed: () => success(widget.order.id).then((_){
+//                          Navigator.pop(context);
+                        }),
                         child: Container(
                           child: Text(
                             "确定",
@@ -283,97 +287,88 @@ class OneOrderState extends State<OneOrder> {
                     child: Column(
                       children: <Widget>[
                         TextField(
-                            controller: _subController,
-                            onChanged: (text) {
-                              _quoteController.text =
-                                  (num.parse(_subController.text) +
-                                              num.parse(_controller.text))
-                                          .toString() +
-                                      "元";
-                              _rateController
-                                  .text = (num.parse(_subController.text) /
-                                          (num.parse(_controller.text) +
-                                              num.parse(_subController.text)) *
-                                          100)
-                                      .toStringAsFixed(0) +
-                                  "%";
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [WhitelistingTextInputFormatter(new RegExp('[0-9.,]'))],//BlacklistingTextInputFormatter(new RegExp('[\\-|\\ ]')),
+                            controller:_subController,
+                            onSubmitted: (text){
+                              if(num.parse(_controller.text)>100){
+                                Fluttertoast.showToast(msg: "定金比率不可以大于100");
+                                _controller.clear();
+                              }
+                            },
+                            onChanged: (text){
+                              _quoteController.text=(num.parse(_subController.text) - num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
+                              _rateController.text = (num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
+                              //_rateController.text=(num.parse(_subController.text)*(num.parse(_controller.text))/100).toStringAsFixed(0)+"%";
                             },
                             decoration: InputDecoration(
-                              labelText: "预付订金",
+                              labelText: "报价总金额",
                               filled: true,
                               fillColor: Colors.grey.shade50,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
+                                borderRadius: BorderRadius.circular(15.0),),
                             )),
-                        Padding(
-                          padding: EdgeInsets.only(top: 5),
-                        ),
+                        Padding(padding: EdgeInsets.only(top: 5),),
                         TextField(
-                          controller: _controller,
-                          onChanged: (text) {
-                            _quoteController.text =
-                                (num.parse(_subController.text) +
-                                            num.parse(_controller.text))
-                                        .toString() +
-                                    "元";
-                            _rateController
-                                .text = (num.parse(_subController.text) /
-                                        (num.parse(_controller.text) +
-                                            num.parse(_subController.text)) *
-                                        100)
-                                    .toStringAsFixed(0) +
-                                "%";
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [WhitelistingTextInputFormatter(new RegExp('[0-9.,]'))],
+                          controller:_controller,
+                          onChanged: (text){
+                            _quoteController.text=(num.parse(_subController.text) - num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
+                            _rateController.text = (num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
                           },
                           decoration: InputDecoration(
+                              suffixText: "%",
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
+                                borderRadius: BorderRadius.circular(15.0),),
+                              labelText: "定金比例",
+                              filled: true,
+                              fillColor: Colors.grey.shade50),
+                        ),
+                        Padding(padding: EdgeInsets.only(top: 5),),
+                        TextField(
+                          enabled: false,
+                          controller:_rateController,
+                          decoration: InputDecoration(
+                              suffixText: "元",
+                              labelText: "订金",
+                              filled: true,
+                              fillColor: Colors.grey.shade50),
+                        ),
+                        Padding(padding: EdgeInsets.only(top: 5),),
+                        TextField(
+                          enabled: false,
+                          controller:_quoteController,
+                          decoration: InputDecoration(
+                              suffixText: "元",
                               labelText: "尾款",
                               filled: true,
                               fillColor: Colors.grey.shade50),
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 5),
-                        ),
-                        TextField(
-                          enabled: false,
-                          controller: _rateController,
-                          decoration: InputDecoration(
-                              labelText: "订金比率",
-                              filled: true,
-                              fillColor: Colors.grey.shade50),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 5),
-                        ),
-                        TextField(
-                          enabled: false,
-                          controller: _quoteController,
-                          decoration: InputDecoration(
-                              labelText: "总金额",
-                              filled: true,
-                              fillColor: Colors.grey.shade50),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 5),
-                        )
+                        Padding(padding: EdgeInsets.only(top: 5),)
                       ],
                     ),
                   ),
                   actions: <Widget>[
                     CupertinoDialogAction(
-                      onPressed: () => save(
-                                  widget.order.id,
-                                  double.parse(_subController.text),
-                                  double.parse(_controller.text))
-                              .then((_) {
-                        Navigator.pop(context);
-                          }),
+                      onPressed: (){
+                        if(num.parse(_controller.text)>100){
+                          Fluttertoast.showToast(msg: "定金比率不可以大于100");
+                          _controller.clear();
+                          return;
+                        }
+                        save(widget.order.id,num.parse(_rateController.text),num.parse(_quoteController.text))
+                            .then((_) {
+                          Navigator.pop(context);
+                        });
+                      },
                       child: Container(
                         child: Text(
                           "确定",
-                          style: TextStyle(fontSize: 16, color: Colors.black),
+                          style: TextStyle(
+                              fontSize: 16,
+                              color:
+                              Colors.black),
                         ),
                       ),
                     ),

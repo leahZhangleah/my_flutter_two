@@ -41,7 +41,7 @@ class OrderFinishState extends State<OrderFinish>
         {"nowPage": nowPage, "limit": limit, "typeList": "four"});
     print(response.data.toString());
     setState(() {
-      _finishedOrder = OrderResponse.fromJson(json.decode(response.data.toString())).page.orders;
+      _finishedOrder.addAll(OrderResponse.fromJson(json.decode(response.data.toString())).page.orders);
       total = json
           .decode(response.data.toString())
           .cast<String, dynamic>()['page']['total'];
@@ -59,6 +59,7 @@ class OrderFinishState extends State<OrderFinish>
     print(response.data.toString());
     nowPage = 1;
     limit = 5;
+    _finishedOrder.clear();
     getYetReceiveOrder(nowPage, limit);
   }
 
@@ -68,6 +69,7 @@ class OrderFinishState extends State<OrderFinish>
       setState(() {
         nowPage = 1;
         limit = 5;
+        _finishedOrder.clear();
         getYetReceiveOrder(nowPage, limit);
       });
     });
@@ -77,12 +79,11 @@ class OrderFinishState extends State<OrderFinish>
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
       setState(() {
-        nowPage += 5;
-        limit += 5;
-        if (nowPage > total) {
+        if (_finishedOrder.length >= total) {
           Fluttertoast.showToast(msg: "没有更多的订单了");
         } else {
-          getYetReceiveOrder(1, limit);
+          nowPage += 1;
+          getYetReceiveOrder(nowPage, limit);
         }
       });
     });
@@ -97,8 +98,11 @@ class OrderFinishState extends State<OrderFinish>
             onFooterRefresh: onFooterRefresh,
             onHeaderRefresh: onHeaderRefresh,
             child: ListView.builder(
-                itemCount: _finishedOrder.length,
+                itemCount: _finishedOrder.length==0?1:_finishedOrder.length,
                 itemBuilder: (context, index) {
+                  if(_finishedOrder==null||_finishedOrder.length==0){
+                    return Center(child:Text("暂无相关数据～"));
+                  }
                   var finishOrder = _finishedOrder[index];
                   return Padding(
                       padding: EdgeInsets.fromLTRB(10, 15, 10, 5),

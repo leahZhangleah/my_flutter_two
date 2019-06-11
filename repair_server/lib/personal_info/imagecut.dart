@@ -12,7 +12,8 @@ import 'package:repair_server/url_manager.dart';
 
 class Imagecut extends StatefulWidget {
 
-  final String imgurl,id;
+  final String id;
+  final File imgurl;
   Imagecut({this.imgurl,this.id});
   
   @override
@@ -29,7 +30,7 @@ class ImagecutState extends State<Imagecut> {
 
   @override
   Widget build(BuildContext context) {
-   imageFile==null?imageurl=widget.imgurl:imageurl=imageFile.path;
+    imageFile==null?imageurl=widget.imgurl.path:imageurl=imageFile.path;
    return Scaffold(
       appBar: AppBar(
         title: Text("裁剪头像"),
@@ -39,15 +40,6 @@ class ImagecutState extends State<Imagecut> {
           GestureDetector(
               onTap: (){
                 _uploadHeadimg(imageurl);
-// .then((_) async {
-//                  SharedPreferences sp = await SharedPreferences.getInstance();
-//                  String token = sp.getString("token");
-//                  RequestManager.baseHeaders = {"token": token};
-//                  ResultModel response = await RequestManager.requestPost(
-//                      "/repairs/repairsUser/update",
-//                      {"id": widget.id, "headimg": url});
-//                  print(response);
-//                });
                 Navigator.pop(context);
               },
               child: Center(
@@ -77,7 +69,9 @@ class ImagecutState extends State<Imagecut> {
 
   Future<Null> _cropImage() async {
     File croppedFile = await ImageCropper.cropImage(
-      sourcePath: widget.imgurl,
+      maxWidth: 200,
+      maxHeight: 200,
+      sourcePath: widget.imgurl.path,
       toolbarTitle: 'Cropper',
       toolbarColor: Colors.blue,
       circleShape: true,
@@ -94,7 +88,7 @@ class ImagecutState extends State<Imagecut> {
   Future<void> _uploadHeadimg(String _url) async {
     Dio dio = new Dio();
     FormData formData = new FormData.from({
-      "file": new UploadFileInfo(new File(_url), _url),
+      "file": new UploadFileInfo(File(_url), _url),
     });
 
     Response response = await dio.post(

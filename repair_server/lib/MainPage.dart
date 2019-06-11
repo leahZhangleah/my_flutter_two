@@ -35,12 +35,11 @@ class MainPageState extends State<MainPage>{
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
       setState(() {
-        nowPage += 5;
-        limit += 5;
+        nowPage += 1;
         if (orderList.length >= total) {
           Fluttertoast.showToast(msg: "没有更多的订单了");
         } else {
-          _fetchOrders(1, limit,typeList,url);
+          _fetchOrders(nowPage, limit,typeList,url);
         }
       });
     });
@@ -104,13 +103,13 @@ class MainPageState extends State<MainPage>{
             onFooterRefresh: onFooterRefresh,
             onHeaderRefresh: onHeaderRefresh,
             child: ListView.builder(
-                itemCount: orderList==null?0:orderList.length,
+                itemCount: orderList.length==0?1:orderList.length,
                 itemBuilder: (context, index) {
-                  if(orderList==null){
-                    return Text("目前还没有订单");
-                  }
-//               var missedOrder = _yetReceiveOrder[index];
-                  return new OneOrder(order:orderList[index]) ;//order: orders[index],
+                  if(orderList.length==0){
+                    return Center(child:Text("暂无相关数据～"));
+                  }else{
+                    return OneOrder(order:orderList[index]) ;
+                  }//order: orders[index],
                 })));
   }
 

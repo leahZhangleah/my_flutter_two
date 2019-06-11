@@ -24,7 +24,7 @@ class OrderReceivedState extends State<OrderReceived>
   int limit = 5;
   int total = 0;
   String url = "";
-  List<Order> mo;
+  List<Order> mo = [];
   var getOrder;
 
   @override
@@ -40,6 +40,13 @@ class OrderReceivedState extends State<OrderReceived>
     RequestManager.baseHeaders = {"token": token};
     ResultModel response = await RequestManager.requestPost(UrlManager().finishMaintain+ordersId,null);
     print(response.data.toString());
+    if(json
+        .decode(response.data.toString())
+        .cast<String, dynamic>()['state']=="true"){
+      Navigator.pop(context);
+      mo.clear();
+      getYetReceiveOrder(1, limit);
+    }
   }
 
   //已接单订单列表
@@ -52,9 +59,14 @@ class OrderReceivedState extends State<OrderReceived>
         {"nowPage": nowPage, "limit": limit, "typeList": "one"});
     print(response.data.toString());
     setState(() {
-      mo = OrderResponse.fromJson(json.decode(response.data.toString()))
+      if(OrderResponse.fromJson(json.decode(response.data.toString()))
           .page
-          .orders;
+          .orders!=null){
+        mo.addAll(OrderResponse.fromJson(json.decode(response.data.toString()))
+            .page
+            .orders);
+      }
+
       total = json
           .decode(response.data.toString())
           .cast<String, dynamic>()['page']['total'];
@@ -68,6 +80,7 @@ class OrderReceivedState extends State<OrderReceived>
       setState(() {
         nowPage = 1;
         limit = 5;
+        mo.clear();
         getYetReceiveOrder(nowPage, limit);
       });
     });
@@ -77,12 +90,11 @@ class OrderReceivedState extends State<OrderReceived>
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
       setState(() {
-        nowPage += 5;
-        limit += 5;
-        if (nowPage > total) {
+        if (mo.length >= total) {
           Fluttertoast.showToast(msg: "没有更多的订单了");
         } else {
-          getYetReceiveOrder(1, limit);
+          nowPage += 1;
+          getYetReceiveOrder(nowPage, limit);
         }
       });
     });
@@ -112,8 +124,11 @@ class OrderReceivedState extends State<OrderReceived>
             onFooterRefresh: onFooterRefresh,
             onHeaderRefresh: onHeaderRefresh,
             child: ListView.builder(
-                itemCount: mo.length,
+                itemCount: mo.length==0?1:mo.length,
                 itemBuilder: (context, index) {
+                  if(mo==null||mo.length==0){
+                    return Center(child:Text("暂无相关数据～"));
+                  }
                   var missedOrder = mo[index];
                   return Padding(
                       padding: EdgeInsets.fromLTRB(10, 15, 10, 5),

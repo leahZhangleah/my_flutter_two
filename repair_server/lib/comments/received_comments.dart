@@ -95,14 +95,6 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
           decoration: BoxDecoration(color: Colors.grey[200]),
           child: Refresh(
               child:
-                comments.length==0?
-                  SingleChildScrollView(
-                      child:Align(
-                        alignment: AlignmentDirectional.center,
-                        child: Text("目前还没有评价"),
-                      )
-                  )
-                :
                 buildCommentsList(comments),
               onFooterRefresh: onFooterRefresh,
               onHeaderRefresh: onHeaderRefresh,
@@ -112,8 +104,11 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
 
   Widget buildCommentsList(List<Comment> comments){
     return ListView.builder(
-        itemCount: comments.length,
+        itemCount: comments.length==0?1:comments.length,
         itemBuilder: (context, index) {
+          if(comments==null||comments.length==0){
+            return Center(child:Text("暂无相关数据～"));
+          }
           var comment = comments[index];
           return OneComment(comment: comment,);
         });

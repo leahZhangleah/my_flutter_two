@@ -23,10 +23,8 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
   int nowPage = 1;
   int limit = 5;
   List<Order> rfqOrder = [];
+  int total = 0;
   String url = "";
-
-
-
   num subscriptionMoney,subscriptionRate,balanceMoney,quoteMoney=0;
 
   @override
@@ -45,9 +43,12 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
         {"nowPage": nowPage, "limit": limit, "typeList": "two"});
     print(response.data.toString());
     setState(() {
-      rfqOrder = OrderResponse.fromJson(json.decode(response.data.toString()))
+      total = json
+          .decode(response.data.toString())
+          .cast<String, dynamic>()['page']['total'];
+      rfqOrder.addAll(OrderResponse.fromJson(json.decode(response.data.toString()))
           .page
-          .orders;
+          .orders);
       url = json
           .decode(response.data.toString())
           .cast<String, dynamic>()['fileUploadServer'];
@@ -65,6 +66,7 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
     print(response.data.toString());
     nowPage = 1;
     limit = 5;
+    rfqOrder.clear();
     getYetReceiveOrder(nowPage, limit);
   }
 
@@ -74,6 +76,7 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
       setState(() {
         nowPage = 1;
         limit = 5;
+        rfqOrder.clear();
         getYetReceiveOrder(nowPage, limit);
       });
     });
@@ -83,18 +86,18 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
       setState(() {
-        nowPage += 5;
-        limit += 5;
-        if (nowPage > rfqOrder.length) {
+        if (rfqOrder.length >= total) {
           Fluttertoast.showToast(msg: "没有更多的订单了");
         } else {
-          getYetReceiveOrder(1, limit);
+          nowPage += 1;
+          getYetReceiveOrder(nowPage, limit);
         }
       });
     });
   }
 
   Future save(String id,num subscriptionMoney,num balanceMoney) async {
+
     SharedPreferences sp = await SharedPreferences.getInstance();
     String token = sp.getString("token");
     RequestManager.baseHeaders = {"token": token};
@@ -127,8 +130,11 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
             onFooterRefresh: onFooterRefresh,
             onHeaderRefresh: onHeaderRefresh,
             child: ListView.builder(
-                itemCount: rfqOrder.length,
+                itemCount: rfqOrder.length==0?1:rfqOrder.length,
                 itemBuilder: (context, index) {
+                  if(rfqOrder==null||rfqOrder.length==0){
+                    return Center(child:Text("暂无相关数据～"));
+                  }
                   var missedOrder = rfqOrder[index];
                   return Padding(
                       padding: EdgeInsets.fromLTRB(10, 15, 10, 5),
@@ -244,7 +250,7 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                                       TextField(
                                                         keyboardType: TextInputType.number,
                                                           inputFormatters: [WhitelistingTextInputFormatter(new RegExp('[0-9.,]'))],//BlacklistingTextInputFormatter(new RegExp('[\\-|\\ ]')),
-                                                        controller:_subController,
+                                                          controller:_subController,
                                                           onSubmitted: (text){
                                                             if(num.parse(_controller.text)>100){
                                                               Fluttertoast.showToast(msg: "定金比率不可以大于100");
@@ -252,7 +258,7 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                                             }
                                                           },
                                                           onChanged: (text){
-                                                            _quoteController.text=(num.parse(_subController.text)-num.parse(_controller.text)).toString();
+                                                            _quoteController.text=(num.parse(_subController.text) - num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
                                                             _rateController.text = (num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
                                                             //_rateController.text=(num.parse(_subController.text)*(num.parse(_controller.text))/100).toStringAsFixed(0)+"%";
                                                           },
@@ -268,14 +274,8 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                                         keyboardType: TextInputType.number,
                                                         inputFormatters: [WhitelistingTextInputFormatter(new RegExp('[0-9.,]'))],
                                                         controller:_controller,
-                                                          onSubmitted: (text){
-                                                          if(num.parse(_controller.text)>100){
-                                                            Fluttertoast.showToast(msg: "定金比率不可以大于100");
-                                                            _controller.clear();
-                                                          }
-                                                          },
                                                           onChanged: (text){
-                                                            _quoteController.text=(num.parse(_subController.text)-num.parse(_controller.text)).toStringAsPrecision(4);
+                                                            _quoteController.text=(num.parse(_subController.text) - num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
                                                             _rateController.text = (num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
                                                           },
                                                         decoration: InputDecoration(
@@ -313,9 +313,15 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                                 actions: <Widget>[
                                                   CupertinoDialogAction(
                                                     onPressed: (){
+                                                        if(num.parse(_controller.text)>100){
+                                                          Fluttertoast.showToast(msg: "定金比率不可以大于100");
+                                                          _controller.clear();
+                                                          return;
+                                                        }
                                                       save(missedOrder.id,num.parse(_rateController.text),num.parse(_quoteController.text))
                                                           .then((_) {
                                                         Navigator.pop(context);
+                                                        rfqOrder.clear();
                                                         getYetReceiveOrder(1, 5);
                                                       });
                                                     },
