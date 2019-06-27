@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'package:repair_server/order/order.dart';
 import 'package:repair_server/order/order_details.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 
 class OrderRFQ extends StatefulWidget {
   @override
@@ -24,7 +25,6 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
   int limit = 5;
   List<Order> rfqOrder = [];
   int total = 0;
-  String url = "";
   num subscriptionMoney,subscriptionRate,balanceMoney,quoteMoney=0;
 
   @override
@@ -35,39 +35,14 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
 
   //待报价订单列表
   Future<void> getYetReceiveOrder(int nowPage, int limit) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestGet(
-       UrlManager().quoteList,
-        {"nowPage": nowPage, "limit": limit, "typeList": "two"});
-    print(response.data.toString());
-    setState(() {
-      total = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['page']['total'];
-      rfqOrder.addAll(OrderResponse.fromJson(json.decode(response.data.toString()))
-          .page
-          .orders);
-      url = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['fileUploadServer'];
+    ApiRequest().getOrderListForDiffType(context, 0,nowPage, limit, "two").then((page){
+      if(page!=null){
+        setState(() {
+          total = page.total;
+          rfqOrder.addAll(page.orders);
+        });
+      }
     });
-    print(rfqOrder.length);
-  }
-
-  //取消订单
-  Future<void> cancelorder(String id) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestPost(
-       UrlManager().cancelOrder+id, null);
-    print(response.data.toString());
-    nowPage = 1;
-    limit = 5;
-    rfqOrder.clear();
-    getYetReceiveOrder(nowPage, limit);
   }
 
   //下拉刷新
@@ -94,25 +69,6 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
         }
       });
     });
-  }
-
-  Future save(String id,num subscriptionMoney,num balanceMoney) async {
-
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    quoteMoney = subscriptionMoney + balanceMoney;
-    subscriptionRate = num.parse((subscriptionMoney / quoteMoney * 100).toStringAsFixed(2));
-    ResultModel response =
-        await RequestManager.requestPost(UrlManager().saveQuote, {
-      "balanceMoney": balanceMoney,
-      "quoteMoney": quoteMoney,
-      "subscriptionMoney": subscriptionMoney,
-      "repairsOrdersId": id,
-      "subscriptionRate": subscriptionRate
-    });
-    print(response.data.toString());
-
   }
 
   @override
@@ -318,7 +274,7 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                                           _controller.clear();
                                                           return;
                                                         }
-                                                      save(missedOrder.id,num.parse(_rateController.text),num.parse(_quoteController.text))
+                                                        ApiRequest().save(context,missedOrder.id,num.parse(_rateController.text),num.parse(_quoteController.text))
                                                           .then((_) {
                                                         Navigator.pop(context);
                                                         rfqOrder.clear();

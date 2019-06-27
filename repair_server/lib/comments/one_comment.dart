@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'comment.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class OneComment extends StatefulWidget {

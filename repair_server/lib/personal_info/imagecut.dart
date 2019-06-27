@@ -5,9 +5,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 
 
 class Imagecut extends StatefulWidget {
@@ -39,8 +40,11 @@ class ImagecutState extends State<Imagecut> {
         actions: <Widget>[
           GestureDetector(
               onTap: (){
-                _uploadHeadimg(imageurl);
-                Navigator.pop(context);
+                ApiRequest().uploadHeadimg(context, imageurl, widget.id).then((result){
+                  if(result){
+                    Navigator.pop(context);
+                  }
+                });
               },
               child: Center(
                   child: Padding(
@@ -83,28 +87,6 @@ class ImagecutState extends State<Imagecut> {
       });
       print(imageFile.path);
     }
-  }
-
-  Future<void> _uploadHeadimg(String _url) async {
-    Dio dio = new Dio();
-    FormData formData = new FormData.from({
-      "file": new UploadFileInfo(File(_url), _url),
-    });
-
-    Response response = await dio.post(
-       UrlManager().getUploadImgUrl(),
-        data: formData,
-    );
-    print(response);
-
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel resultModel = await RequestManager.requestPost(
-       UrlManager().updatePersonalInfo,
-        {"id": widget.id, "headimg": json.decode(response.toString())['fileUploadServer']+json.decode(response.toString())['data']['url']});
-    print(resultModel.data);
-    Fluttertoast.showToast(msg: json.decode(resultModel.data.toString()).cast<String, dynamic>()['msg']);
   }
 
 }

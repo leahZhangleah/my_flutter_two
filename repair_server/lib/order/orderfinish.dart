@@ -3,12 +3,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'package:repair_server/order/order.dart';
 import 'package:repair_server/order/order_details.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 
 class OrderFinish extends StatefulWidget {
   @override
@@ -33,34 +34,16 @@ class OrderFinishState extends State<OrderFinish>
 
   //未接单订单列表
   Future<void> getYetReceiveOrder(int nowPage, int limit) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestGet(
-        UrlManager().quoteList,
-        {"nowPage": nowPage, "limit": limit, "typeList": "four"});
-    print(response.data.toString());
-    setState(() {
-      _finishedOrder.addAll(OrderResponse.fromJson(json.decode(response.data.toString())).page.orders);
-      total = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['page']['total'];
-    });
-    print(total);
-  }
+    ApiRequest().getOrderListForDiffType(context, 0,nowPage, limit, "four").then((page){
+      if(page!=null){
+        setState(() {
+          _finishedOrder.addAll(page.orders);
+          total = page.total;
+        });
+      }
 
-  //取消订单
-  Future<void> cancelorder(String id) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestPost(
-        UrlManager().cancelOrder+id, null);
-    print(response.data.toString());
-    nowPage = 1;
-    limit = 5;
-    _finishedOrder.clear();
-    getYetReceiveOrder(nowPage, limit);
+    });
+
   }
 
   //下拉刷新

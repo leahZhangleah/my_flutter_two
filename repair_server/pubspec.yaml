@@ -32,6 +32,7 @@ dependencies:
   video_player: ^0.7.2
   flutter_cache_manager: ^0.3.2
   smooth_star_rating: ^1.0.1
+  #barcode_scan : 1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +50,10 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  fonts:
+    - family:  Sign_scan
+      fonts:
+         - asset: assets/fonts/Sign_scan.ttf
   assets:
     - assets/images/
   # To add assets to your application, add an assets section, like this:

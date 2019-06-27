@@ -3,13 +3,14 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'Name.dart';
 import 'package:repair_server/personal_info/imagecut.dart';
 import 'package:repair_server/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 
 class Personal extends StatefulWidget {
 
@@ -69,22 +70,12 @@ class PersonalState extends State<Personal> {
 
 
   Future getPersonalInfo() async{
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestGet(
-        UrlManager().personalInfo,null);
-    print(response.data.toString());
-    setState(() {
-      name = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['maintainerUser']['name'];
-      id = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['maintainerUser']['id'];
-      imageUrl = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['maintainerUser']['headimg'];
+    ApiRequest().getPersonalInfo(context).then((json){
+      if(json!=null){
+        name = json.cast<String, dynamic>()['maintainerUser']['name'];
+        id = json.cast<String, dynamic>()['maintainerUser']['id'];
+        imageUrl = json.cast<String, dynamic>()['maintainerUser']['headimg'];
+      }
     });
   }
 

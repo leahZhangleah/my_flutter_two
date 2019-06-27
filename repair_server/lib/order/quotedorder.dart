@@ -3,13 +3,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'package:repair_server/order/chooseMaintainer.dart';
 import 'package:repair_server/order/order.dart';
 import 'package:repair_server/order/order_details.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 
 class OrderQuote extends StatefulWidget {
   @override
@@ -25,7 +26,6 @@ class OrderQuoteState extends State<OrderQuote>
   int limit = 5;
   int total = 0;
   List<Order> rfqOrder = [];
-  String url = "";
 
   @override
   void initState() {
@@ -35,25 +35,14 @@ class OrderQuoteState extends State<OrderQuote>
 
   //待报价订单列表
   Future<void> getYetReceiveOrder(int nowPage, int limit) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestGet(
-        UrlManager().quoteList,
-        {"nowPage": nowPage, "limit": limit, "typeList": "three"});
-    print(response.data.toString());
-    setState(() {
-      rfqOrder.addAll(OrderResponse.fromJson(json.decode(response.data.toString()))
-          .page
-          .orders);
-      total = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['page']['total'];
-      url = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['fileUploadServer'];
+    ApiRequest().getOrderListForDiffType(context, 0, nowPage, limit, "three").then((page){
+      if(page!=null){
+        setState(() {
+          rfqOrder.addAll(page.orders);
+          total = page.total;
+        });
+      }
     });
-    print(total);
   }
 
   //下拉刷新

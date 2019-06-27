@@ -1,10 +1,12 @@
+import 'package:repair_server/comments/page.dart';
+
 import 'comment.dart';
 class CommentResponse{
   String msg;
   int code;
   String fileUploadServer;
   bool state;
-  Page page;
+  CommentPage page;
 
   CommentResponse({
     this.msg,
@@ -19,7 +21,7 @@ class CommentResponse{
     code: json["code"],
     fileUploadServer: json["fileUploadServer"],
     state: json["state"],
-    page: Page.fromJson(json["page"]),
+    page: CommentPage.fromJson(json["page"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -31,22 +33,3 @@ class CommentResponse{
   };
 }
 
-class Page {
-  int total;
-  List<Comment> comments;
-
-  Page({
-    this.total,
-    this.comments,
-  });
-
-  factory Page.fromJson(Map<String, dynamic> json) => new Page(
-    total: json["total"],
-    comments: new List<Comment>.from(json["rows"].map((x) => Comment.fromJson(x))),
-  );
-
-  Map<String, dynamic> toJson() => {
-    "total": total,
-    "rows": new List<dynamic>.from(comments.map((x) => x.toJson())),
-  };
-}

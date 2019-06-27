@@ -3,12 +3,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'package:repair_server/order/order.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:repair_server/order/order_details.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 
 class OrderReceived extends StatefulWidget {
   @override
@@ -35,43 +36,27 @@ class OrderReceivedState extends State<OrderReceived>
 
   //维修完成
   Future<void> success(String ordersId) async{
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestPost(UrlManager().finishMaintain+ordersId,null);
-    print(response.data.toString());
-    if(json
-        .decode(response.data.toString())
-        .cast<String, dynamic>()['state']=="true"){
-      Navigator.pop(context);
-      mo.clear();
-      getYetReceiveOrder(1, limit);
-    }
+    ApiRequest().success(context, ordersId).then((result){
+      if(result){
+        Navigator.pop(context);
+        mo.clear();
+        getYetReceiveOrder(1, limit);
+      }
+    });
   }
 
   //已接单订单列表
   Future<void> getYetReceiveOrder(int nowPage, int limit) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestGet(
-        UrlManager().maintainerList,
-        {"nowPage": nowPage, "limit": limit, "typeList": "one"});
-    print(response.data.toString());
-    setState(() {
-      if(OrderResponse.fromJson(json.decode(response.data.toString()))
-          .page
-          .orders!=null){
-        mo.addAll(OrderResponse.fromJson(json.decode(response.data.toString()))
-            .page
-            .orders);
+    ApiRequest().getOrderListForDiffType(context, 1, nowPage, limit, "one").then((page){
+      if(page!=null){
+        setState(() {
+          if(page.orders!=null){
+            mo.addAll(page.orders);
+          }
+          total = page.total;
+        });
       }
-
-      total = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['page']['total'];
     });
-    print(total);
   }
 
   //下拉刷新
@@ -105,10 +90,14 @@ class OrderReceivedState extends State<OrderReceived>
     // TODO: implement build
     return Container(
         decoration: BoxDecoration(color: Colors.grey[200]),
-        child: FutureBuilder(builder: buildPersonalLine, future: getOrder));
+        child: FutureBuilder(
+            builder: buildOrderList, 
+            future: getOrder
+        )
+    );
   }
 
-  Widget buildPersonalLine(BuildContext context, AsyncSnapshot snapshot) {
+  Widget buildOrderList(BuildContext context, AsyncSnapshot snapshot) {
     switch (snapshot.connectionState) {
       case ConnectionState.none:
         return Center(child: Text('还没有开始网络请求'));
@@ -248,7 +237,8 @@ class OrderReceivedState extends State<OrderReceived>
                           ],
                         ),
                       ));
-                }));
+                })
+        );
     }
   }
 

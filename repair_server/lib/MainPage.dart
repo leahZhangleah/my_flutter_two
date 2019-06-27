@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_refresh/flutter_refresh.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'package:repair_server/order/one_order.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:repair_server/HttpUtils.dart';
 import 'mine_page.dart';
-import 'knowledge/knowledge_page.dart';
 import 'order/order.dart';
-import 'url_manager.dart';
-import 'dart:convert';
-import 'package:repair_server/order/order_response.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'register.dart';
+import 'package:repair_server/custom_icons/sign_scan_icons.dart';
+import 'order/page.dart';
+//import 'package:barcode_scan/barcode_scan.dart';
 
 class MainPage extends StatefulWidget{
 
@@ -26,20 +24,19 @@ class MainPageState extends State<MainPage>{
   int nowPage = 1;
   int limit = 5;
   int total = 0;
-  String url,typeList = "";
   List<Order> orderList = [];
   var getOrders;
-  UrlManager _urlManager;
+  String barcode;
 
   //上拉加载更多
   Future<Null> onFooterRefresh() {
     return new Future.delayed(new Duration(seconds: 2), () {
       setState(() {
-        nowPage += 1;
         if (orderList.length >= total) {
           Fluttertoast.showToast(msg: "没有更多的订单了");
         } else {
-          _fetchOrders(nowPage, limit,typeList,url);
+          nowPage += 1;
+          //_fetchOrders(nowPage, limit);
         }
       });
     });
@@ -51,8 +48,8 @@ class MainPageState extends State<MainPage>{
       setState(() {
         nowPage = 1;
         limit = 5;
-        orderList.clear();
-        _fetchOrders(nowPage, limit, typeList,url);
+        //orderList.clear();
+        //_fetchOrders(nowPage, limit);
       });
     });
   }
@@ -61,8 +58,7 @@ class MainPageState extends State<MainPage>{
   void initState() {
     // TODO: implement initState
     super.initState();
-    _urlManager = new UrlManager();
-    _fetchOrders(nowPage, limit, typeList,url);
+    getOrders = _fetchOrders(nowPage, limit);
   }
 
   @override
@@ -73,11 +69,8 @@ class MainPageState extends State<MainPage>{
         title: Text("修一修"),
         centerTitle: true,
         leading:IconButton(
-            icon: Icon(Icons.book,color: Colors.white,),
-            onPressed: ()=>Navigator.push(context, new MaterialPageRoute(
-                builder: (context){
-                  return new KnowledgePage();
-                }))),
+            icon: Icon(Sign_scan.qrcode,color: Colors.white,),
+            onPressed: ()=>scan()),
         actions: <Widget>[
           Center(
             child: IconButton(
@@ -86,7 +79,7 @@ class MainPageState extends State<MainPage>{
                     builder: (context){
                       return new MinePage();
                     })).then((_){
-                  _fetchOrders(nowPage, limit, typeList,url);
+                  _fetchOrders(nowPage, limit);
                 })),//todo leading to personal page
           )
         ],
@@ -95,53 +88,82 @@ class MainPageState extends State<MainPage>{
     );
   }
 
-
-  Widget OrderList(){
-    return Container(
-        decoration: BoxDecoration(color: Colors.grey[200]),
-        child: Refresh(
-            onFooterRefresh: onFooterRefresh,
-            onHeaderRefresh: onHeaderRefresh,
-            child: ListView.builder(
-                itemCount: orderList.length==0?1:orderList.length,
-                itemBuilder: (context, index) {
-                  if(orderList.length==0){
-                    return Center(child:Text("暂无相关数据～"));
-                  }else{
-                    return OneOrder(order:orderList[index]) ;
-                  }//order: orders[index],
-                })));
+  Future scan() async {
+    /*try {
+      String barcode = await BarcodeScanner.scan();
+      setState(() {
+        return this.barcode = barcode;
+      });
+    } *//*on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.CameraAccessDenied) {
+        setState(() {
+          return this.barcode = '用户未授权使用相机';
+        });
+      } else {
+        setState(() {
+          return this.barcode = '未知错误: $e';
+        });
+      }
+    }*//* on FormatException {
+      setState(() => this.barcode = 'null (用户为扫描二维码)');
+    } catch (e) {
+      setState(() => this.barcode = 'Unknown 未知错误: $e');
+    }*/
   }
 
 
-  Future<void> _fetchOrders(int nowPage, int limit,String typeList,String url) async {
+  Widget OrderList(){
+    return FutureBuilder<OrderPage>(
+        //decoration: BoxDecoration(color: Colors.grey[200]),
+        future: getOrders,
+        builder: (BuildContext context, AsyncSnapshot<OrderPage> snapshot){
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+              return Text('还没有开始网络请求');
+            case ConnectionState.active:
+              return Text('ConnectionState.active');
+            case ConnectionState.waiting:
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            case ConnectionState.done:
+              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+              if(snapshot.data!=null){
+                total = snapshot.data.total;
+                orderList = snapshot.data.orders;
+                return Refresh(
+                    onFooterRefresh: onFooterRefresh,
+                    onHeaderRefresh: onHeaderRefresh,
+                    child: ListView.builder(
+                        itemCount: orderList.length==0?1:orderList.length,
+                        itemBuilder: (context, index) {
+                          if(orderList.length==0){
+                            return Center(child:Text("暂无相关数据～"));
+                          }else{
+                            return OneOrder(order:orderList[index]) ;
+                          }//order: orders[index],
+                        }));
+              }else{
+                return Container(
+                  child: Text("获取订单错误，请稍后再试"),
+                );
+              }
+
+          }
+        }
+
+    );
+  }
+
+
+  Future<OrderPage> _fetchOrders(int nowPage, int limit) async {
+    int userType;
+    String typeList;
     SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
     String type = sp.getString("type");
     type=="0"?typeList="five":typeList="three";
-    type=="0"?url=_urlManager.quoteList:url=_urlManager.maintainerList;
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestGet(
-        url,
-        {"nowPage": nowPage, "limit": limit,"typeList":typeList});
-    print(response.data.toString());
-    var json = jsonDecode(response.data.toString());
-    //todo parse json as below
-    if(json["msg"]=="token失效，请重新登录"){
-      Fluttertoast.showToast(msg: "登录信息已失效，请重新登录");
-      sp.remove("type");
-      Navigator.push(context, new MaterialPageRoute(
-          builder: (context){
-            return new RegisterScreen();
-          }));
-    }
-
-    setState(() {
-      OrderResponse orderResponse = OrderResponse.fromJson(json);
-      Page page= orderResponse.page;
-      total = page.total;
-      orderList.addAll(page.orders);
-    });
+    type=="0"?userType=0:userType=1;          //0:报价员，1：维修员
+    return ApiRequest().getOrderListForDiffType(context, userType, nowPage, limit, typeList);
   }
 
 }

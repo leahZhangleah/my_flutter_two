@@ -6,10 +6,12 @@ import 'package:dio/dio.dart';
 import 'package:repair_server/MainPage.dart';
 import 'package:repair_server/RegisterResponse.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 class RegisterScreen extends StatefulWidget {
   String _phone, _capcha;
+
+  RegisterScreen(this._phone);
 
   @override
   State<StatefulWidget> createState() {

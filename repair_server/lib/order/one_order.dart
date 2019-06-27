@@ -2,13 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
 import 'package:repair_server/MainPage.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'package:repair_server/order/chooseMaintainer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'order.dart';
 import 'package:repair_server/order/order_details.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 
 //维修员
 class OneOrder extends StatefulWidget {
@@ -29,107 +30,100 @@ class OneOrderState extends State<OneOrder> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Padding(
-        padding: EdgeInsets.fromLTRB(10, 15, 10, 5),
-        child: Container(
-          decoration: BoxDecoration(color: Colors.white),
-          child: Column(
-            children: <Widget>[
-              ListTile(
-                onTap: () => Navigator.push(context,
-                        new MaterialPageRoute(builder: (BuildContext context) {
-                      return new OrderDetails(
-                        order: widget.order,
-                      );
-                    })),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      decoration: BoxDecoration(color: Colors.white),
+      child: Column(
+        children: <Widget>[
+          ListTile(
+            onTap: () => Navigator.push(context,
+                    new MaterialPageRoute(builder: (BuildContext context) {
+                  return new OrderDetails(
+                    order: widget.order,
+                  );
+                })),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+                  child: Row(
+                    children: <Widget>[
+                      Text("订单编号："),
+                      Text(widget.order.orderNumber),
+                    ],
+                  ),
+                ),
+                Divider(
+                  height: 2,
+                  color: Colors.grey,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Container(
-                      padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                      child: Row(
-                        children: <Widget>[
-                          Text("订单编号："),
-                          Text(widget.order.orderNumber),
-                        ],
-                      ),
-                    ),
-                    Divider(
-                      height: 2,
-                      color: Colors.grey,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Padding(
-                                padding: EdgeInsets.only(top: 5.0, bottom: 5),
-                                child: Text(widget.order.description,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        fontSize: 18, color: Colors.black))),
-                            Text(
-                              "#" + widget.order.type,
-                              style: TextStyle(color: Colors.lightBlue),
-                            ),
-                            Padding(
-                                padding: EdgeInsets.only(top: 5, bottom: 5),
-                                child: Text(widget.order.updateTime,
-                                    style: TextStyle(color: Colors.grey)))
-                          ],
+                        Text(widget.order.description,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 18, color: Colors.black)),
+                        Text(
+                          "#" + widget.order.type,
+                          style: TextStyle(color: Colors.lightBlue),
                         ),
-                        widget.order.orderState >= 15
-                            ? Column(
-                                children: <Widget>[
-                                  Padding(
-                                      padding:
-                                          EdgeInsets.only(top: 5.0, bottom: 5),
-                                      child: Text(
-                                          "定金:" +
-                                              widget.order.repairsOrdersQuote
-                                                  .subscriptionMoney
-                                                  .toString() +
-                                              "元",)),
-                                  Text(
-                                    "尾款:" +
-                                        widget.order.repairsOrdersQuote
-                                            .balanceMoney
-                                            .toString() +
-                                        "元",
-                                  ),
-                                  Padding(
-                                      padding:
-                                          EdgeInsets.only(top: 5, bottom: 5),
-                                      child: Text(
-                                          "总付款:" +
-                                              widget.order.repairsOrdersQuote
-                                                  .quoteMoney
-                                                  .toString() +
-                                              "元",))
-                                ],
-                              )
-                            : Container(),
+                        Text(widget.order.updateTime,
+                            style: TextStyle(color: Colors.grey))
                       ],
                     ),
-                    Divider(
-                      height: 2,
-                      color: Colors.grey,
-                    ),
-                    widget.order.orderState == 10
-                        ? buildRFQ()
-                        : widget.order.orderState == 5
-                            ? buildMissedOrder()
-                            : widget.order.orderState == 20
-                                ? buildQuoteOrder()
-                                : buildOverOrder()
+                    widget.order.orderState >= 15
+                        ? Column(
+                            children: <Widget>[
+                              Padding(
+                                  padding:
+                                      EdgeInsets.only(top: 5.0, bottom: 5),
+                                  child: Text(
+                                      "定金:" +
+                                          widget.order.repairsOrdersQuote
+                                              .subscriptionMoney
+                                              .toString() +
+                                          "元",)),
+                              Text(
+                                "尾款:" +
+                                    widget.order.repairsOrdersQuote
+                                        .balanceMoney
+                                        .toString() +
+                                    "元",
+                              ),
+                              Padding(
+                                  padding:
+                                      EdgeInsets.only(top: 5, bottom: 5),
+                                  child: Text(
+                                      "总付款:" +
+                                          widget.order.repairsOrdersQuote
+                                              .quoteMoney
+                                              .toString() +
+                                          "元",))
+                            ],
+                          )
+                        : Container(),
                   ],
                 ),
-              ),
-            ],
+                Divider(
+                  height: 2,
+                  color: Colors.grey,
+                ),
+                widget.order.orderState == 10
+                    ? buildRFQ()
+                    : widget.order.orderState == 5
+                        ? buildMissedOrder()
+                        : widget.order.orderState == 20
+                            ? buildQuoteOrder()
+                            : buildOverOrder()
+              ],
+            ),
           ),
-        ));
+        ],
+      ),
+    );
   }
 
   Widget buildOverOrder() {
@@ -155,7 +149,7 @@ class OneOrderState extends State<OneOrder> {
                     ),
                     actions: <Widget>[
                       CupertinoDialogAction(
-                        onPressed: () => success(widget.order.id).then((_){
+                        onPressed: () => ApiRequest().success(context,widget.order.id).then((value){
 //                          Navigator.pop(context);
                         }),
                         child: Container(
@@ -225,8 +219,10 @@ class OneOrderState extends State<OneOrder> {
                   ),
                   actions: <Widget>[
                     CupertinoDialogAction(
-                      onPressed: () => captureOrder(widget.order.id).then((_) {
-                            Navigator.pop(context);
+                      onPressed: () => ApiRequest().captureOrder(context,widget.order.id).then((result) {
+                        if(result){
+                          Navigator.pop(context);
+                        }
                           }),
                       child: Container(
                         child: Text(
@@ -357,9 +353,10 @@ class OneOrderState extends State<OneOrder> {
                           _controller.clear();
                           return;
                         }
-                        save(widget.order.id,num.parse(_rateController.text),num.parse(_quoteController.text))
-                            .then((_) {
-                          Navigator.pop(context);
+                        ApiRequest().save(context, widget.order.id, num.parse(_rateController.text), num.parse(_quoteController.text)).then((result) {
+                         if(result){
+                           Navigator.pop(context);
+                         }
                         });
                       },
                       child: Container(
@@ -389,42 +386,5 @@ class OneOrderState extends State<OneOrder> {
             );
           }),
     );
-  }
-
-  Future save(String id, num subscriptionMoney, num balanceMoney) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    quoteMoney = subscriptionMoney + balanceMoney;
-    subscriptionRate =
-        double.parse((subscriptionMoney / quoteMoney * 100).toStringAsFixed(2));
-    ResultModel response =
-        await RequestManager.requestPost(UrlManager().saveQuote, {
-      "balanceMoney": balanceMoney,
-      "quoteMoney": quoteMoney,
-      "subscriptionMoney": subscriptionMoney,
-      "repairsOrdersId": id,
-      "subscriptionRate": subscriptionRate
-    });
-    print(response.data.toString());
-  }
-
-  Future<void> captureOrder(String ordersId) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestPost(
-        UrlManager().captureOrder+ordersId, null);
-    print(response.data.toString());
-  }
-
-  //维修完成
-  Future<void> success(String ordersId) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestPost(
-        UrlManager().finishMaintain+ordersId, null);
-    print(response.data.toString());
   }
 }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'package:repair_server/model/bottom_button.dart';
 import 'package:repair_server/model/staff.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 
 class ChooseMaintainer extends StatefulWidget {
   final String orderId;
@@ -20,21 +21,10 @@ class ChooseMaintainerState extends State<ChooseMaintainer> {
 
   @override
   void initState() {
-    getStaff = staff();
     super.initState();
+    getStaff =  ApiRequest().staff(context);
   }
 
-  Future staff() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestGet(
-       UrlManager().myMaintainerUser, null);
-    print(response.data.toString());
-    setState(() {
-      staffList = Staff.allFromResponse(response.data.toString());
-    });
-  }
 
   //分配订单
   Future allotOrder(String ordersId) async {
@@ -44,13 +34,11 @@ class ChooseMaintainerState extends State<ChooseMaintainer> {
         userIds.add(staffList[i].id);
       }
     }
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestPost(
-        UrlManager().allotMaintainer+ordersId,userIds);
-    print(response.data.toString());
-    Navigator.pop(context);
+    ApiRequest().allotOrder(context, ordersId, userIds).then((result){
+      if(result){
+        Navigator.pop(context);
+      }
+    });
   }
 
   @override
@@ -79,7 +67,7 @@ class ChooseMaintainerState extends State<ChooseMaintainer> {
               )))
         ],
       ),
-      body: FutureBuilder(
+      body: FutureBuilder<List<Staff>>(
         builder: _buildFuture,
         future: getStaff,
       ),
@@ -111,13 +99,14 @@ class ChooseMaintainerState extends State<ChooseMaintainer> {
         );
       case ConnectionState.done:
         if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+        staffList = snapshot.data;
         for (int i = 0; i < staffList.length; i++) {
           ischecks.add(false);
         }
         return ListView.builder(
-            itemCount: staffList.length,
+            itemCount:  staffList.length,
             itemBuilder: (context, index) {
-              var sL = staffList[index];
+              var sL =  staffList[index];
               return ListTile(
                 title: Text(sL.name),
                 trailing: Checkbox(

@@ -1,10 +1,12 @@
+import 'package:repair_server/order/page.dart';
+
 import 'order.dart';
 class OrderResponse {
   String msg;
   int code;
   String fileUploadServer;
   bool state;
-  Page page;
+  OrderPage page;
 
   OrderResponse(
       {this.msg, this.code, this.fileUploadServer, this.state, this.page});
@@ -14,7 +16,7 @@ class OrderResponse {
     code = json['code'];
     fileUploadServer = json['fileUploadServer'];
     state = json['state'];
-    page = json['page'] != null ? new Page.fromJson(json['page']) : null;
+    page = json['page'] != null ? new OrderPage.fromJson(json['page']) : null;
   }
 
 
@@ -31,28 +33,3 @@ class OrderResponse {
   }
 }
 
-class Page {
-  int total;
-  List<Order> orders;
-
-  Page({this.total, this.orders});
-
-  Page.fromJson(Map<String, dynamic> json) {
-    total = json['total'];
-    if (json['rows'] != null) {
-      orders = new List<Order>();
-      json['rows'].forEach((v) {
-        orders.add(new Order.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['total'] = this.total;
-    if (this.orders != null) {
-      data['rows'] = this.orders.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}

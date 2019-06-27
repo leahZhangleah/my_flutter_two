@@ -3,12 +3,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'package:repair_server/order/order.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:repair_server/order/order_details.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 
 class OrderMissed extends StatefulWidget {
   @override
@@ -33,36 +34,20 @@ class OrderMissedState extends State<OrderMissed>
     super.initState();
   }
 
-  Future<void> captureOrder(String ordersId) async{
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestPost(UrlManager().captureOrder+ordersId,null);
-    print(response.data.toString());
-  }
-
   //未接单订单列表
   Future<void> getYetReceiveOrder(int nowPage, int limit) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestGet(
-        UrlManager().quoteList,
-        {"nowPage": nowPage, "limit": limit, "typeList": "one"});
-    print(response.data.toString());
-    setState(() {
-      if(OrderResponse.fromJson(json.decode(response.data.toString()))
-          .page
-          .orders!=null){
-        mo.addAll(OrderResponse.fromJson(json.decode(response.data.toString()))
-            .page
-            .orders);
-      }
-      total = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['page']['total'];
-    });
-    print(total);
+   ApiRequest().getOrderListForDiffType(context, 0,nowPage, limit, "one").then((page){
+     if(page!=null){
+       setState(() {
+         if(page.orders!=null){
+           mo.addAll(page.orders);
+         }
+         total = page.total;
+       });
+       print(total);
+     }
+   });
+
   }
 
   //下拉刷新
@@ -215,7 +200,7 @@ class OrderMissedState extends State<OrderMissed>
                                                 ),
                                                 actions: <Widget>[
                                                   CupertinoDialogAction(
-                                                    onPressed: () =>captureOrder(missedOrder.id).then((_){
+                                                    onPressed: () =>ApiRequest().captureOrder(context,missedOrder.id).then((_){
                                                       Navigator.pop(context);
                                                       mo.clear();
                                                       getYetReceiveOrder(1, 5);

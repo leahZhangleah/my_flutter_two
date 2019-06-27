@@ -25,11 +25,11 @@ class AppState extends State<Rooter> with SingleTickerProviderStateMixin {
 
   final routes = <String, WidgetBuilder>{
     "/home": (context) => MainPage(), //主页//欢迎
-    "/register": (context) => RegisterScreen(), //注册
+    "/register": (context) => RegisterScreen(null), //注册
     "/comments":(context)=>ReceivedComments(),
   };
 
-  String token,type = "";
+  String token,type,account = "";
 
   @override
   void initState() {
@@ -41,6 +41,7 @@ class AppState extends State<Rooter> with SingleTickerProviderStateMixin {
     setState(() {
       token = sp.getString("token");
       type = sp.getString("type");
+      account = sp.getString("account");
     });
   }
 
@@ -51,7 +52,7 @@ class AppState extends State<Rooter> with SingleTickerProviderStateMixin {
       debugShowCheckedModeBanner: false,
       title: '',
       routes: routes,
-      home: token==null?RegisterScreen():MainPage(),
+      home: token==null?RegisterScreen(account):MainPage(),
     );
   }
 }

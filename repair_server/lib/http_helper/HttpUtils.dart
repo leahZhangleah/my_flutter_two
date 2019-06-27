@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'package:dio/dio.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:connectivity/connectivity.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'url_manager.dart';
 
 class RequestManager {
@@ -24,6 +25,16 @@ class RequestManager {
     return await _requestBase(url, params, baseHeaders, options, noTip: noTip);
   }
 
+  static Future<bool> hasInternet()async{
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi) {
+      return true;
+    } else if (connectivityResult == ConnectivityResult.none) {
+      Fluttertoast.showToast(msg: "请检查网络连接");
+      return false;
+    }
+  }
+
   static requestGet(url,params,{noTips = false}) async {
     Options options = Options(method: "get");
     ResultModel resultModel = await _requestBase(url, params, baseHeaders, options);
@@ -32,12 +43,10 @@ class RequestManager {
 
   static _requestBase(url, params, Map<String, String> header, Options options,
       {noTip = false}) async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.mobile ||
-        connectivityResult == ConnectivityResult.wifi) {
-    } else if (connectivityResult == ConnectivityResult.none) {
+    bool internet = await hasInternet();
+    if(!internet){
       return ResultModel(
-          ResultErrorEvent(HttpResultCode.NETWORK_ERROR, "请检查网络"),
+          ResultErrorEvent(HttpResultCode.NETWORK_ERROR, "请检查网络连接"),
           false,
           HttpResultCode.NETWORK_ERROR);
     }

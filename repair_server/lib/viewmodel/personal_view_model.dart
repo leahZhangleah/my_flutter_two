@@ -20,6 +20,10 @@ class PersonalViewMModel {
         leadingIcon: Icons.person_outline,
         text: "认证信息",
       ),
+      PersonalModel(
+        leadingIcon:Icons.book,
+        text:"知识讲堂",
+      )
     ];
   }
 }

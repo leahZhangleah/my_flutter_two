@@ -2,15 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'package:repair_server/model/bottom_button.dart';
 import 'package:repair_server/order/chooseMaintainer.dart';
 import 'package:repair_server/order/order_self.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'order.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 import 'video_player_screen.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 
 class OrderDetails extends StatefulWidget {
   Order order;
@@ -251,7 +252,11 @@ class OrderDetailsState extends State<OrderDetails> {
   buildSuccess() {
     return NextButton(
       text: "确认完成",
-      onNext: ()=>success(widget.order.id),
+      onNext: ()=>ApiRequest().success(context,widget.order.id).then((result){
+        if(result){
+          Navigator.pop(context);
+        }
+      }),
       padingHorzation: 20.0,
     );
   }
@@ -278,15 +283,6 @@ class OrderDetailsState extends State<OrderDetails> {
     );
   }
 
-  Future<void> captureOrder(String ordersId) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestPost(
-       UrlManager().captureOrder+ordersId, null);
-    print(response.data.toString());
-  }
-
   _onNext() {
     showDialog<bool>(
       barrierDismissible: false,
@@ -301,8 +297,10 @@ class OrderDetailsState extends State<OrderDetails> {
           ),
           actions: <Widget>[
             CupertinoDialogAction(
-              onPressed: () => captureOrder(widget.order.id).then((_) {
-                    Navigator.pop(context);
+              onPressed: () => ApiRequest().captureOrder(context, widget.order.id).then((result) {
+                    if(result){
+                      Navigator.pop(context);
+                    }
                   }),
               child: Container(
                 child: Text(
@@ -328,23 +326,6 @@ class OrderDetailsState extends State<OrderDetails> {
     );
   }
 
-  Future save(String id, num subscriptionMoney, num balanceMoney) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    quoteMoney = subscriptionMoney + balanceMoney;
-    subscriptionRate =
-        double.parse((subscriptionMoney / quoteMoney * 100).toStringAsFixed(2));
-    ResultModel response =
-        await RequestManager.requestPost(UrlManager().saveQuote, {
-      "balanceMoney": balanceMoney,
-      "quoteMoney": quoteMoney,
-      "subscriptionMoney": subscriptionMoney,
-      "repairsOrdersId": id,
-      "subscriptionRate": subscriptionRate
-    });
-    print(response.data.toString());
-  }
 
   _save() {
     final _controller = TextEditingController();
@@ -438,11 +419,12 @@ class OrderDetailsState extends State<OrderDetails> {
                   _controller.clear();
                   return;
                 }
-                save(widget.order.id,num.parse(_rateController.text),num.parse(_quoteController.text))
-                    .then((_) {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-
+                ApiRequest().save(context, widget.order.id, num.parse(_rateController.text), num.parse(_quoteController.text))
+                    .then((result) {
+                      if(result){
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      }
                 });
               },
               child: Container(
@@ -472,14 +454,4 @@ class OrderDetailsState extends State<OrderDetails> {
     );
   }
 
-  //维修完成
-  Future<void> success(String ordersId) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestPost(
-       UrlManager().finishMaintain+ordersId, null);
-    print(response.data.toString());
-    Navigator.pop(context);
-  }
 }

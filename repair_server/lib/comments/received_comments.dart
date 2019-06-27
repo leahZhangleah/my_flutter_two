@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:repair_server/http_helper/api_request.dart';
 import 'comment.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'comment_response.dart';
 import 'one_comment.dart';
-import 'package:repair_server/url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 import 'package:repair_server/register.dart';
 
 class ReceivedComments extends StatefulWidget {
@@ -23,39 +24,21 @@ class ReceivedCommentsState extends State<ReceivedComments> with AutomaticKeepAl
   int limit = 5;
   int total = 0;
   List<Comment> comments;
-  String url = "";
 
   @override
   void initState() {
-
     super.initState();
-    UrlManager urlManager = new UrlManager();
-    url = urlManager.receiveAppraiseList;
     comments=new List();
     _getReceivedComments(nowPage, limit);
   }
 
   //待报价订单列表
   Future<void> _getReceivedComments(int nowPage, int limit) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestGet(
-        url,
-        {"nowPage": nowPage, "limit": limit});
-    print(response.data.toString());
-    var json = jsonDecode(response.data.toString());
-    if(json["msg"]=="token失效，请重新登录"){
-      Fluttertoast.showToast(msg: "登录信息已失效，请重新登录");
-      Navigator.pop(context);
-      Navigator.of(context).pushAndRemoveUntil(
-          new MaterialPageRoute(builder: (context) => new RegisterScreen()
-          ),  (route)=>route==null,);
-    }
-    setState(() {
-      Page page = CommentResponse.fromJson(json).page;
-      total = page.total;
-      comments.addAll(page.comments);
+    ApiRequest().getReceivedComments(context, nowPage, limit).then((page){
+      if(page!=null){
+        comments.addAll(page.comments);
+        total = page.total;
+      }
     });
   }
 

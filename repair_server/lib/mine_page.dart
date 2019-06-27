@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:repair_server/HttpUtils.dart';
+import 'package:repair_server/http_helper/HttpUtils.dart';
+import 'package:repair_server/http_helper/api_request.dart';
+import 'package:repair_server/knowledge/knowledge_page.dart';
 import 'package:repair_server/verification/identify.dart';
 import 'package:repair_server/model/behavior.dart';
 import 'package:repair_server/model/personalmodel.dart';
@@ -11,7 +13,7 @@ import 'package:repair_server/register.dart';
 import 'package:repair_server/viewmodel/personal_view_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:repair_server/comments/received_comments.dart';
-import 'url_manager.dart';
+import 'package:repair_server/http_helper/url_manager.dart';
 class MinePage extends StatefulWidget {
 
   @override
@@ -20,7 +22,7 @@ class MinePage extends StatefulWidget {
   }
 }
 
-class MineState extends State<MinePage> {
+class MineState extends State<MinePage> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
   num padingHorzation = 20;
@@ -31,25 +33,22 @@ class MineState extends State<MinePage> {
   @override
   void initState() {
     super.initState();
-    getInfo = getPersonalInfo();
+    //getInfo = getPersonalInfo();
+    getInfo = ApiRequest().getPersonalInfo(context);
   }
 
   Future getPersonalInfo() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders = {"token": token};
-    ResultModel response = await RequestManager.requestGet(
-       UrlManager().personalInfo, null);//todo
-    print(response.data.toString());
-    setState(() {
-      name = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['maintainerUser']['name'];
+    ApiRequest().getPersonalInfo(context)/*.then((json){
+      if(json!=null){
+        setState(() {
+          name = json
+              .cast<String, dynamic>()['maintainerUser']['name'];
 
-      image = json
-          .decode(response.data.toString())
-          .cast<String, dynamic>()['maintainerUser']['headimg'];
-    });
+          image = json
+              .cast<String, dynamic>()['maintainerUser']['headimg'];
+        });
+      }
+    })*/;
   }
 
   @override
@@ -67,7 +66,9 @@ class MineState extends State<MinePage> {
         bottom: PreferredSize(
             child: Container(
               height: 100,
-              child: FutureBuilder(builder: buildPersonalLine,future:getInfo),
+              child: FutureBuilder(
+                  builder: buildPersonalLine,
+                  future:getInfo),
             ),
             preferredSize: Size(30, 80)),
       ),
@@ -80,7 +81,7 @@ class MineState extends State<MinePage> {
                 ScrollConfiguration(
                     behavior: MyBehavior(),
                     child: ListView.builder(
-                        itemCount: 3,
+                        itemCount: 4,
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
                           return buildAddressLine(index, data);
@@ -94,7 +95,7 @@ class MineState extends State<MinePage> {
         child: Container(
           height: 80.0,
           child: RaisedButton(
-            onPressed: logout,
+            onPressed: ()=>ApiRequest().logout(context),
             child: Text(
               "退出登录",
               style: TextStyle(fontSize: 20),
@@ -118,6 +119,10 @@ class MineState extends State<MinePage> {
         );
       case ConnectionState.done:
         if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+        name = snapshot.data
+            .cast<String, dynamic>()['maintainerUser']['name'];
+        image = snapshot.data
+            .cast<String, dynamic>()['maintainerUser']['headimg'];
         return new Container(
             color: Colors.lightBlue,
             padding: EdgeInsets.only(left: 10, bottom: 10),
@@ -128,7 +133,7 @@ class MineState extends State<MinePage> {
                   child: FadeInImage.assetNetwork(
                     placeholder: "assets/images/person_placeholder.png",
                     fit: BoxFit.fitWidth,
-                    image: image,
+                    image: UrlManager().fileUploadServer+image,
                     width: 75.0,
                     height: 75.0,
                   ),
@@ -150,7 +155,8 @@ class MineState extends State<MinePage> {
                       },
                     ),
                   ).then((_) {
-                    getPersonalInfo();
+                    ApiRequest().getPersonalInfo(context);
+                    //getPersonalInfo();
                   });
                 },
               ),
@@ -189,12 +195,18 @@ class MineState extends State<MinePage> {
                       return new ReceivedComments();//todo navigate to 收到评价
                     },
                   ),
-                ): Navigator.of(context).push(
+                ): index ==2
+                    ? Navigator.of(context).push(
                   new MaterialPageRoute(
                     builder: (c) {
                       return Identify();//TODO navigate to 认证信息
                     },
                   ),
+                ):Navigator.push(context, new MaterialPageRoute(
+                    builder: (context){
+                      return new KnowledgePage();
+                    }
+                    )
                 );
               },
             ),
@@ -206,18 +218,4 @@ class MineState extends State<MinePage> {
         ]));
   }
 
-
-  void logout() async{
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String token = sp.getString("token");
-    RequestManager.baseHeaders={"token": token};
-    ResultModel response = await RequestManager.requestPost(UrlManager().logout,null);
-    if(json.decode(response.data.toString())["msg"]=="success"){
-      sp.remove("token");
-      sp.remove("type");
-      Navigator.of(context).pushAndRemoveUntil(
-          new MaterialPageRoute(builder: (context) => new RegisterScreen()
-          ), (route) => route == null);
-    };
-  }
 }
