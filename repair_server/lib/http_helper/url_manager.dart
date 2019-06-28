@@ -16,6 +16,7 @@ class UrlManager{
   String _uploadImg = "/upload/uploadImg";
   String _updatePersonalInfo =  "/maintainer/maintainerUser/update";
   String _cancelOrder =  "/repairs/repairsOrders/close/";
+  String _orderDetailById = "/repairs/repairsOrders/info/";
 
   String getUpdatePersonalInfoUrl(){
     return _getFullAddress(_updatePersonalInfo);
@@ -70,6 +71,8 @@ class UrlManager{
   String get uploadImg => _uploadImg;
 
   String get cancelOrder => _cancelOrder;
+
+  String get orderDetailById => _orderDetailById;
 
 
 }

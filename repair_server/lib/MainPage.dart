@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:repair_server/http_helper/api_request.dart';
 import 'package:repair_server/order/one_order.dart';
+import 'package:repair_server/order/order_detail_bean/orders.dart';
+import 'package:repair_server/order/order_list_bean/page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'mine_page.dart';
-import 'order/order.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:repair_server/custom_icons/sign_scan_icons.dart';
-import 'order/page.dart';
+
 //import 'package:barcode_scan/barcode_scan.dart';
 
 class MainPage extends StatefulWidget{
@@ -24,7 +25,7 @@ class MainPageState extends State<MainPage>{
   int nowPage = 1;
   int limit = 5;
   int total = 0;
-  List<Order> orderList = [];
+  List<Orders> orderList = [];
   var getOrders;
   String barcode;
 
@@ -113,10 +114,10 @@ class MainPageState extends State<MainPage>{
 
 
   Widget OrderList(){
-    return FutureBuilder<OrderPage>(
+    return FutureBuilder<Page>(
         //decoration: BoxDecoration(color: Colors.grey[200]),
         future: getOrders,
-        builder: (BuildContext context, AsyncSnapshot<OrderPage> snapshot){
+        builder: (BuildContext context, AsyncSnapshot<Page> snapshot){
           switch (snapshot.connectionState) {
             case ConnectionState.none:
               return Text('还没有开始网络请求');
@@ -156,7 +157,7 @@ class MainPageState extends State<MainPage>{
   }
 
 
-  Future<OrderPage> _fetchOrders(int nowPage, int limit) async {
+  Future<Page> _fetchOrders(int nowPage, int limit) async {
     int userType;
     String typeList;
     SharedPreferences sp = await SharedPreferences.getInstance();

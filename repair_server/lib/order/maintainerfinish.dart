@@ -5,7 +5,9 @@ import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:repair_server/http_helper/HttpUtils.dart';
 import 'package:repair_server/http_helper/api_request.dart';
+import 'package:repair_server/order/bottom_bar_helper.dart';
 import 'package:repair_server/order/order.dart';
+import 'package:repair_server/order/order_detail_bean/orders.dart';
 import 'package:repair_server/order/order_details.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,7 +26,7 @@ class MaintainerFinishState extends State<MaintainerFinish>
   int nowPage = 1;
   int limit = 5;
   int total = 0;
-  List<Order> _finishedOrder = [];
+  List<Orders> _finishedOrder = [];
 
   @override
   void initState() {
@@ -97,7 +99,7 @@ class MaintainerFinishState extends State<MaintainerFinish>
                                       new MaterialPageRoute(
                                           builder: (BuildContext context) {
                                     return new OrderDetails(
-                                      order: finishOrder,
+                                      orderId: finishOrder.id,
                                     );
                                   })),
                               subtitle: Column(
@@ -115,41 +117,27 @@ class MaintainerFinishState extends State<MaintainerFinish>
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Padding(
-                                                  padding: EdgeInsets.only(
-                                                      top: 10, bottom: 20),
+                                                  padding: EdgeInsets.only(top: 10, bottom: 20),
                                                   child: Text(
                                                       finishOrder.description,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
+                                                      overflow: TextOverflow.ellipsis,
                                                       maxLines: 1,
-                                                      style: TextStyle(
-                                                          fontSize: 18,
-                                                          color:
-                                                              Colors.black))),
-                                              Text(
-                                                "#" + finishOrder.type,
-                                                style: TextStyle(
-                                                    color: Colors.lightBlue),
+                                                      style: TextStyle(fontSize: 18, color: Colors.black))),
+                                              Text("#" + finishOrder.type, style: TextStyle(color: Colors.lightBlue),
                                               ),
                                               Padding(
-                                                  padding: EdgeInsets.only(
-                                                      top: 5, bottom: 5),
-                                                  child: Text(
-                                                      finishOrder.createTime,
-                                                      style: TextStyle(
-                                                          color: Colors.grey)))
+                                                  padding: EdgeInsets.only(top: 5, bottom: 5),
+                                                  child: Text(finishOrder.createTime, style: TextStyle(color: Colors.grey)))
                                             ],
                                           )),
                                       Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: <Widget>[
                                           Padding(
                                             child: Text(
                                               "定金：" +
-                                                  finishOrder.repairsOrdersQuote
+                                                  finishOrder.ordersQuote
                                                       .subscriptionMoney
                                                       .toString() +
                                                   "元",
@@ -160,7 +148,7 @@ class MaintainerFinishState extends State<MaintainerFinish>
                                           Padding(
                                             child: Text(
                                               "尾款：" +
-                                                  finishOrder.repairsOrdersQuote
+                                                  finishOrder.ordersQuote
                                                       .balanceMoney
                                                       .toString() +
                                                   "元",
@@ -171,7 +159,7 @@ class MaintainerFinishState extends State<MaintainerFinish>
                                           Padding(
                                             child: Text(
                                               "合计：" +
-                                                  finishOrder.repairsOrdersQuote
+                                                  finishOrder.ordersQuote
                                                       .quoteMoney
                                                       .toString() +
                                                   "元",
@@ -189,21 +177,10 @@ class MaintainerFinishState extends State<MaintainerFinish>
                                   ),
                                   Align(
                                       alignment: FractionalOffset.bottomRight,
-                                      child: OutlineButton(
-                                        borderSide: BorderSide(
-                                            width: 1, color: Colors.lightBlue),
-                                        color: Colors.lightBlue,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(5))),
-                                        child: finishOrder.orderState == 40
-                                            ? Text("已评价",
-                                                style: new TextStyle(
-                                                    color: Colors.lightBlue))
-                                            : Text("待评价",
-                                                style: new TextStyle(
-                                                    color: Colors.lightBlue)),
-                                      ))
+                                      child: finishOrder.orderState == 35
+                                          ? BottomBarHelper().buildStatusButton("待评价"):
+                                      BottomBarHelper().buildStatusButton("已评价"),
+                                  )
                                 ],
                               ))
                         ],

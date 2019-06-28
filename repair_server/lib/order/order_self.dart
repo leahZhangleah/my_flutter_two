@@ -35,9 +35,9 @@ class SelfOrderState extends State<SelfOrder>
   @override
   void initState() {
     super.initState();
-    getType().then((_){
+    getType();/*.then((_){
       initTabData();
-    });
+    });*/
 
   }
 
@@ -45,10 +45,22 @@ class SelfOrderState extends State<SelfOrder>
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
       type = sp.getString("type");
+      type=="0"?
+      tabList = [
+        new TabTitle('待接单', 0),
+        new TabTitle('待报价', 1),
+        new TabTitle('已报价', 2),
+        new TabTitle('已完成', 3)
+      ]:tabList = [
+        new TabTitle('待维修', 0),
+        new TabTitle('已完成', 1)
+      ];
+      mController =
+          TabController(length: tabList.length, vsync: this, initialIndex: 0);
     });
   }
 
-  initTabData() {
+ /* initTabData() {
     print(type);
     type=="0"?
     tabList = [
@@ -63,7 +75,7 @@ class SelfOrderState extends State<SelfOrder>
 
     mController =
         TabController(length: tabList.length, vsync: this, initialIndex: 0);
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {

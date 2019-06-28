@@ -6,7 +6,9 @@ import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:repair_server/http_helper/HttpUtils.dart';
 import 'package:repair_server/http_helper/api_request.dart';
+import 'package:repair_server/order/bottom_bar_helper.dart';
 import 'package:repair_server/order/order.dart';
+import 'package:repair_server/order/order_detail_bean/orders.dart';
 import 'package:repair_server/order/order_details.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,7 +25,7 @@ class OrderRFQ extends StatefulWidget {
 class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
   int nowPage = 1;
   int limit = 5;
-  List<Order> rfqOrder = [];
+  List<Orders> rfqOrder = [];
   int total = 0;
   num subscriptionMoney,subscriptionRate,balanceMoney,quoteMoney=0;
 
@@ -73,13 +75,6 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
 
   @override
   Widget build(BuildContext context) {
-
-    final _controller = TextEditingController();
-    final _rateController = TextEditingController();
-    final _quoteController = TextEditingController();
-    final _subController = TextEditingController();
-
-
     return Container(
         decoration: BoxDecoration(color: Colors.grey[200]),
         child: Refresh(
@@ -102,7 +97,7 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                               onTap: () => Navigator.push(context,
                                       new MaterialPageRoute(
                                           builder: (BuildContext context) {
-                                    return new OrderDetails(order: missedOrder,);
+                                    return new OrderDetails(orderId: missedOrder.id,);
                                   })),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,146 +166,9 @@ class OrderRFQState extends State<OrderRFQ> with AutomaticKeepAliveClientMixin {
                                     height: 2,
                                     color: Colors.grey,
                                   ),
-                                  Align(
-                                    alignment: FractionalOffset.bottomRight,
-                                    child: OutlineButton(
-                                        borderSide: BorderSide(
-                                            width: 1, color: Colors.lightBlue),
-                                        color: Colors.lightBlue,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(5))),
-                                        child: Text("立即报价",
-                                            style: new TextStyle(
-                                                color: Colors.lightBlue)),
-                                        onPressed: () {
-                                          showDialog<bool>(
-                                            barrierDismissible: false,
-                                            context: context,
-                                            builder: (context) {
-                                              return CupertinoAlertDialog(
-                                                title: CupertinoDialogAction(
-                                                  child: Text(
-                                                    "报价",
-                                                    style: TextStyle(
-                                                        fontSize: 18,
-                                                        color:
-                                                            Colors.black),
-                                                  ),
-                                                ),
-                                                content: Card(
-                                                  margin: EdgeInsets.all(0),
-                                                  elevation: 0.0,
-                                                  child: Column(
-                                                    children: <Widget>[
-                                                      TextField(
-                                                        keyboardType: TextInputType.number,
-                                                          inputFormatters: [WhitelistingTextInputFormatter(new RegExp('[0-9.,]'))],//BlacklistingTextInputFormatter(new RegExp('[\\-|\\ ]')),
-                                                          controller:_subController,
-                                                          onSubmitted: (text){
-                                                            if(num.parse(_controller.text)>100){
-                                                              Fluttertoast.showToast(msg: "定金比率不可以大于100");
-                                                              _controller.clear();
-                                                            }
-                                                          },
-                                                          onChanged: (text){
-                                                            _quoteController.text=(num.parse(_subController.text) - num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
-                                                            _rateController.text = (num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
-                                                            //_rateController.text=(num.parse(_subController.text)*(num.parse(_controller.text))/100).toStringAsFixed(0)+"%";
-                                                          },
-                                                        decoration: InputDecoration(
-                                                            labelText: "报价总金额",
-                                                            filled: true,
-                                                            fillColor: Colors.grey.shade50,
-                                                          border: OutlineInputBorder(
-                                                            borderRadius: BorderRadius.circular(15.0),),
-                                                      )),
-                                                      Padding(padding: EdgeInsets.only(top: 5),),
-                                                      TextField(
-                                                        keyboardType: TextInputType.number,
-                                                        inputFormatters: [WhitelistingTextInputFormatter(new RegExp('[0-9.,]'))],
-                                                        controller:_controller,
-                                                          onChanged: (text){
-                                                            _quoteController.text=(num.parse(_subController.text) - num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
-                                                            _rateController.text = (num.parse(_subController.text)*num.parse(_controller.text)/100).toStringAsPrecision(4);
-                                                          },
-                                                        decoration: InputDecoration(
-                                                          suffixText: "%",
-                                                            border: OutlineInputBorder(
-                                                              borderRadius: BorderRadius.circular(15.0),),
-                                                            labelText: "定金比例",
-                                                            filled: true,
-                                                            fillColor: Colors.grey.shade50),
-                                                      ),
-                                                      Padding(padding: EdgeInsets.only(top: 5),),
-                                                      TextField(
-                                                        enabled: false,
-                                                        controller:_rateController,
-                                                        decoration: InputDecoration(
-                                                            suffixText: "元",
-                                                            labelText: "订金",
-                                                            filled: true,
-                                                            fillColor: Colors.grey.shade50),
-                                                      ),
-                                                      Padding(padding: EdgeInsets.only(top: 5),),
-                                                      TextField(
-                                                        enabled: false,
-                                                        controller:_quoteController,
-                                                        decoration: InputDecoration(
-                                                          suffixText: "元",
-                                                            labelText: "尾款",
-                                                            filled: true,
-                                                            fillColor: Colors.grey.shade50),
-                                                      ),
-                                                      Padding(padding: EdgeInsets.only(top: 5),)
-                                                    ],
-                                                  ),
-                                                ),
-                                                actions: <Widget>[
-                                                  CupertinoDialogAction(
-                                                    onPressed: (){
-                                                        if(num.parse(_controller.text)>100){
-                                                          Fluttertoast.showToast(msg: "定金比率不可以大于100");
-                                                          _controller.clear();
-                                                          return;
-                                                        }
-                                                        ApiRequest().save(context,missedOrder.id,num.parse(_rateController.text),num.parse(_quoteController.text))
-                                                          .then((_) {
-                                                        Navigator.pop(context);
-                                                        rfqOrder.clear();
-                                                        getYetReceiveOrder(1, 5);
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      child: Text(
-                                                        "确定",
-                                                        style: TextStyle(
-                                                            fontSize: 16,
-                                                            color:
-                                                                Colors.black),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  CupertinoDialogAction(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: Container(
-                                                      child: Text(
-                                                        "取消",
-                                                        style: TextStyle(
-                                                            fontSize: 14,
-                                                            color:
-                                                                Colors.black),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        }),
-                                  )
+                                 missedOrder.orderState == 7?
+                                     BottomBarHelper().buildStatusButton("已接单"):
+                                     BottomBarHelper().buildQuoteBtn(context, missedOrder.id)
                                 ],
                               ),
                             ),

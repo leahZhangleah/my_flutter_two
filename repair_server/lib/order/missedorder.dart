@@ -5,7 +5,9 @@ import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:repair_server/http_helper/HttpUtils.dart';
 import 'package:repair_server/http_helper/api_request.dart';
+import 'package:repair_server/order/bottom_bar_helper.dart';
 import 'package:repair_server/order/order.dart';
+import 'package:repair_server/order/order_detail_bean/orders.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:repair_server/order/order_details.dart';
@@ -25,7 +27,7 @@ class OrderMissedState extends State<OrderMissed>
   int limit = 5;
   int total = 0;
   String url = "";
-  List<Order> mo = [];
+  List<Orders> mo = [];
   var getOrder;
 
   @override
@@ -80,7 +82,9 @@ class OrderMissedState extends State<OrderMissed>
     // TODO: implement build
     return Container(
         decoration: BoxDecoration(color: Colors.grey[200]),
-        child: FutureBuilder(builder: buildPersonalLine, future: getOrder));
+        child: FutureBuilder(
+            builder: buildPersonalLine,
+            future: getOrder));
   }
 
   Widget buildPersonalLine(BuildContext context, AsyncSnapshot snapshot) {
@@ -115,7 +119,7 @@ class OrderMissedState extends State<OrderMissed>
                               onTap: () => Navigator.push(context,
                                       new MaterialPageRoute(
                                           builder: (BuildContext context) {
-                                    return new OrderDetails(order: missedOrder,);
+                                    return new OrderDetails(orderId: missedOrder.id,);
                                   })),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,70 +175,7 @@ class OrderMissedState extends State<OrderMissed>
                                     height: 2,
                                     color: Colors.grey,
                                   ),
-                                  Align(
-                                    alignment: FractionalOffset.bottomRight,
-                                    child: OutlineButton(
-                                        borderSide: BorderSide(
-                                            width: 1, color: Colors.lightBlue),
-                                        color: Colors.lightBlue,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(5))),
-                                        child: Text("抢单",
-                                            style: new TextStyle(
-                                                color: Colors.lightBlue)),
-                                        onPressed: () {
-                                          showDialog<bool>(
-                                            barrierDismissible: false,
-                                            context: context,
-                                            builder: (context) {
-                                              return CupertinoAlertDialog(
-                                                title: CupertinoDialogAction(
-                                                  child: Text(
-                                                    "是否确认抢单？",
-                                                    style: TextStyle(
-                                                        fontSize: 18,
-                                                        color:
-                                                            Colors.redAccent),
-                                                  ),
-                                                ),
-                                                actions: <Widget>[
-                                                  CupertinoDialogAction(
-                                                    onPressed: () =>ApiRequest().captureOrder(context,missedOrder.id).then((_){
-                                                      Navigator.pop(context);
-                                                      mo.clear();
-                                                      getYetReceiveOrder(1, 5);
-                                                    }),
-                                                    child: Container(
-                                                      child: Text(
-                                                        "确定",
-                                                        style: TextStyle(
-                                                            fontSize: 16,
-                                                            color:
-                                                                Colors.black),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  CupertinoDialogAction(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: Container(
-                                                      child: Text(
-                                                        "取消",
-                                                        style: TextStyle(
-                                                            fontSize: 14,
-                                                            color:
-                                                                Colors.black),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        }),
-                                  )
+                                  BottomBarHelper().buildCaptureOrderBtn(context, missedOrder.id),
                                 ],
                               ),
                             ),

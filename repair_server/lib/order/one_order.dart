@@ -6,6 +6,7 @@ import 'package:repair_server/http_helper/HttpUtils.dart';
 import 'package:repair_server/MainPage.dart';
 import 'package:repair_server/http_helper/api_request.dart';
 import 'package:repair_server/order/chooseMaintainer.dart';
+import 'package:repair_server/order/order_detail_bean/orders.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'order.dart';
 import 'package:repair_server/order/order_details.dart';
@@ -13,7 +14,7 @@ import 'package:repair_server/http_helper/url_manager.dart';
 
 //维修员
 class OneOrder extends StatefulWidget {
-  Order order;
+  Orders order;
 
   OneOrder({this.order});
 
@@ -38,7 +39,7 @@ class OneOrderState extends State<OneOrder> {
             onTap: () => Navigator.push(context,
                     new MaterialPageRoute(builder: (BuildContext context) {
                   return new OrderDetails(
-                    order: widget.order,
+                    orderId: widget.order.id,
                   );
                 })),
             subtitle: Column(
@@ -82,13 +83,13 @@ class OneOrderState extends State<OneOrder> {
                                       EdgeInsets.only(top: 5.0, bottom: 5),
                                   child: Text(
                                       "定金:" +
-                                          widget.order.repairsOrdersQuote
+                                          widget.order.ordersQuote
                                               .subscriptionMoney
                                               .toString() +
                                           "元",)),
                               Text(
                                 "尾款:" +
-                                    widget.order.repairsOrdersQuote
+                                    widget.order.ordersQuote
                                         .balanceMoney
                                         .toString() +
                                     "元",
@@ -98,7 +99,7 @@ class OneOrderState extends State<OneOrder> {
                                       EdgeInsets.only(top: 5, bottom: 5),
                                   child: Text(
                                       "总付款:" +
-                                          widget.order.repairsOrdersQuote
+                                          widget.order.ordersQuote
                                               .quoteMoney
                                               .toString() +
                                           "元",))

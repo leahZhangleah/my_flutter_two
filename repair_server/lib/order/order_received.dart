@@ -5,7 +5,9 @@ import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:repair_server/http_helper/HttpUtils.dart';
 import 'package:repair_server/http_helper/api_request.dart';
+import 'package:repair_server/order/bottom_bar_helper.dart';
 import 'package:repair_server/order/order.dart';
+import 'package:repair_server/order/order_detail_bean/orders.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:repair_server/order/order_details.dart';
@@ -25,7 +27,7 @@ class OrderReceivedState extends State<OrderReceived>
   int limit = 5;
   int total = 0;
   String url = "";
-  List<Order> mo = [];
+  List<Orders> mo = [];
   var getOrder;
 
   @override
@@ -129,7 +131,7 @@ class OrderReceivedState extends State<OrderReceived>
                               onTap: () => Navigator.push(context,
                                       new MaterialPageRoute(
                                           builder: (BuildContext context) {
-                                    return new OrderDetails(order: missedOrder,);
+                                    return new OrderDetails(orderId: missedOrder.id,);
                                   })),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,79 +159,11 @@ class OrderReceivedState extends State<OrderReceived>
                                   ),
                                   Align(
                                     alignment: FractionalOffset.bottomRight,
-                                    child: missedOrder.orderState == 30
-                                        ? OutlineButton(
-                                            borderSide: BorderSide(
-                                                width: 1,
-                                                color: Colors.lightBlue),
-                                            color: Colors.lightBlue,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(5))),
-                                            child: Text("待付尾款",
-                                                style: new TextStyle(
-                                                    color: Colors.lightBlue)),
-                                          )
-                                        : OutlineButton(
-                                            borderSide: BorderSide(
-                                                width: 1,
-                                                color: Colors.lightBlue),
-                                            color: Colors.lightBlue,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(5))),
-                                            child: Text("确认完成",
-                                                style: new TextStyle(
-                                                    color: Colors.lightBlue)),
-                                            onPressed: () {
-                                              showDialog<bool>(
-                                                barrierDismissible: false,
-                                                context: context,
-                                                builder: (context) {
-                                                  return CupertinoAlertDialog(
-                                                    title:
-                                                        CupertinoDialogAction(
-                                                      child: Text(
-                                                        "确定维修已全部完成？",
-                                                        style: TextStyle(
-                                                            fontSize: 18,
-                                                            color: Colors
-                                                                .redAccent),
-                                                      ),
-                                                    ),
-                                                    actions: <Widget>[
-                                                      CupertinoDialogAction(
-                                                        onPressed: () => success(missedOrder.id),
-                                                        child: Container(
-                                                          child: Text(
-                                                            "确定",
-                                                            style: TextStyle(
-                                                                fontSize: 16,
-                                                                color: Colors
-                                                                    .black),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      CupertinoDialogAction(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                        child: Container(
-                                                          child: Text(
-                                                            "取消",
-                                                            style: TextStyle(
-                                                                fontSize: 14,
-                                                                color: Colors
-                                                                    .black),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
-                                            }),
+                                    child: missedOrder.orderState == 22
+                                        ? BottomBarHelper().buildStatusButton("待维修"):
+                                    missedOrder.orderState ==25
+                                        ? BottomBarHelper().buildFinishMaintainBtn(context, missedOrder.id):
+                                            BottomBarHelper().buildStatusButton("维修已完成，等待支付尾款"),
                                   )
                                 ],
                               ),

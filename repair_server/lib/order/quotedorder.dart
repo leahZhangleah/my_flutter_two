@@ -5,8 +5,10 @@ import 'package:flutter_refresh/flutter_refresh.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:repair_server/http_helper/HttpUtils.dart';
 import 'package:repair_server/http_helper/api_request.dart';
+import 'package:repair_server/order/bottom_bar_helper.dart';
 import 'package:repair_server/order/chooseMaintainer.dart';
 import 'package:repair_server/order/order.dart';
+import 'package:repair_server/order/order_detail_bean/orders.dart';
 import 'package:repair_server/order/order_details.dart';
 import 'package:repair_server/order/order_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,7 +27,7 @@ class OrderQuoteState extends State<OrderQuote>
   int nowPage = 1;
   int limit = 5;
   int total = 0;
-  List<Order> rfqOrder = [];
+  List<Orders> rfqOrder = [];
 
   @override
   void initState() {
@@ -97,7 +99,7 @@ class OrderQuoteState extends State<OrderQuote>
                                       new MaterialPageRoute(
                                           builder: (BuildContext context) {
                                     return new OrderDetails(
-                                      order: missedOrder,
+                                      orderId: missedOrder.id,
                                     );
                                   })),
                               subtitle: Column(
@@ -193,7 +195,7 @@ class OrderQuoteState extends State<OrderQuote>
                                           Padding(
                                             child: Text(
                                               "定金：" +
-                                                  missedOrder.repairsOrdersQuote
+                                                  missedOrder.ordersQuote
                                                       .subscriptionMoney
                                                       .toString() +
                                                   "元",
@@ -204,7 +206,7 @@ class OrderQuoteState extends State<OrderQuote>
                                           Padding(
                                             child: Text(
                                               "尾款：" +
-                                                  missedOrder.repairsOrdersQuote
+                                                  missedOrder.ordersQuote
                                                       .balanceMoney
                                                       .toString() +
                                                   "元",
@@ -215,7 +217,7 @@ class OrderQuoteState extends State<OrderQuote>
                                           Padding(
                                             child: Text(
                                               "合计：" +
-                                                  missedOrder.repairsOrdersQuote
+                                                  missedOrder.ordersQuote
                                                       .quoteMoney
                                                       .toString() +
                                                   "元",
@@ -234,76 +236,12 @@ class OrderQuoteState extends State<OrderQuote>
                                   Align(
                                     alignment: FractionalOffset.bottomRight,
                                     child: missedOrder.orderState == 15
-                                        ? OutlineButton(
-                                            borderSide: BorderSide(
-                                                width: 1,
-                                                color: Colors.lightBlue),
-                                            color: Colors.lightBlue,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(5))),
-                                            child: Text("待付定金",
-                                                style: new TextStyle(
-                                                    color: Colors.lightBlue)),
-                                          )
+                                        ? BottomBarHelper().buildStatusButton("已报价,待付定金")
                                         : missedOrder.orderState == 20
-                                            ? OutlineButton(
-                                                borderSide: BorderSide(
-                                                    width: 1,
-                                                    color: Colors.lightBlue),
-                                                color: Colors.lightBlue,
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                5))),
-                                                child: Text("分配订单",
-                                                    style: new TextStyle(
-                                                        color:
-                                                            Colors.lightBlue)),
-                                                onPressed: () {
-                                                  Navigator.push(context,
-                                                      new MaterialPageRoute(
-                                                          builder: (BuildContext context) {
-                                                            return new ChooseMaintainer(orderId:missedOrder.id);
-                                                          })).then((_){
-                                                            rfqOrder.clear();
-                                                            getYetReceiveOrder(1, 5);
-                                                  });
-                                                })
+                                            ? BottomBarHelper().buildAllotMaintainerBtn(context, missedOrder.id)
                                             : missedOrder.orderState == 25
-                                                ? OutlineButton(
-                                                    borderSide: BorderSide(
-                                                        width: 1,
-                                                        color:
-                                                            Colors.lightBlue),
-                                                    color: Colors.lightBlue,
-                                                    shape: RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    5))),
-                                                    child: Text("维修中",
-                                                        style: new TextStyle(
-                                                            color: Colors
-                                                                .lightBlue)),
-                                                  )
-                                                : OutlineButton(
-                                                    borderSide: BorderSide(
-                                                        width: 1,
-                                                        color:
-                                                            Colors.lightBlue),
-                                                    color: Colors.lightBlue,
-                                                    shape: RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    5))),
-                                                    child: Text("待付尾款",
-                                                        style: new TextStyle(
-                                                            color: Colors
-                                                                .lightBlue)),
-                                                  ),
+                                                ? BottomBarHelper().buildStatusButton("维修中")
+                                                : BottomBarHelper().buildStatusButton("维修已完成，等待支付尾款"),
                                   )
                                 ],
                               ),
